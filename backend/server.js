@@ -74,23 +74,20 @@ app.get('/sensor-data', async (req, res) => {
         from(bucket: "${influxBucket}")
         |> range(start: -1h)
         |> filter(fn: (r) => r._measurement == "sensor_readings")
-        |> keep(columns: ["_time", "_field", "_value", "sensor_id", "tipo"])
+        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> keep(columns: ["_time", "temperatura", "humidade", "sensor_id", "tipo"])
     `;
 
     try {
-        const results = [];
-
         const rows = await queryApi.collectRows(fluxQuery);
 
-        rows.forEach((row) => {
-            results.push({
-                time: row._time,
-                field: row._field,
-                value: row._value,
-                sensor_id: row.sensor_id,
-                tipo: row.tipo
-            });
-        });
+        const results = rows.map((row) => ({
+            time: row._time,
+            sensor_id: row.sensor_id,
+            tipo: row.tipo,
+            temperatura: row.temperatura,
+            humidade: row.humidade
+        }));
 
         res.json(results);
 
