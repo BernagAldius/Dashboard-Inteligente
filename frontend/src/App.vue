@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import VueApexCharts from 'vue3-apexcharts'
+import { io } from 'socket.io-client'
+const socket = io('http://localhost:3000')
 
 const sensorData = ref([])
 const latestTemperature = ref(null)
@@ -36,6 +38,44 @@ const chartOptions = ref({
   }
 })
 
+const updateDashboard = (newReading) => {
+  sensorData.value.push(newReading)
+
+  if (sensorData.value.length > 100) {
+    sensorData.value.shift()
+  }
+
+  latestTemperature.value = newReading.temperatura
+  latestHumidity.value = newReading.humidade
+
+  const lastReadings = sensorData.value.slice(-20)
+
+  const labels = lastReadings.map((item) => {
+    return new Date(item.time).toLocaleTimeString()
+  })
+
+  temperatureSeries.value = [
+    {
+      name: 'Temperatura',
+      data: lastReadings.map((item) => item.temperatura)
+    }
+  ]
+
+  humiditySeries.value = [
+    {
+      name: 'Humidade',
+      data: lastReadings.map((item) => item.humidade)
+    }
+  ]
+
+  chartOptions.value = {
+    ...chartOptions.value,
+    xaxis: {
+      categories: labels
+    }
+  }
+}
+
 const fetchSensorData = async () => {
   try {
     const response = await axios.get('http://localhost:3000/sensor-data')
@@ -43,38 +83,9 @@ const fetchSensorData = async () => {
     sensorData.value = response.data
 
     if (sensorData.value.length > 0) {
-      const latest = sensorData.value[sensorData.value.length - 1]
-
-      latestTemperature.value = latest.temperatura
-      latestHumidity.value = latest.humidade
-
-      const lastReadings = sensorData.value.slice(-20)
-
-      const labels = lastReadings.map((item) => {
-        return new Date(item.time).toLocaleTimeString()
-      })
-
-      temperatureSeries.value = [
-        {
-          name: 'Temperatura',
-          data: lastReadings.map((item) => item.temperatura)
-        }
-      ]
-
-      humiditySeries.value = [
-        {
-          name: 'Humidade',
-          data: lastReadings.map((item) => item.humidade)
-        }
-      ]
-
-      chartOptions.value = {
-        ...chartOptions.value,
-        xaxis: {
-          categories: labels
-        }
-      }
-    }
+  const latest = sensorData.value[sensorData.value.length - 1]
+  updateDashboard(latest)
+}
   } catch (error) {
     console.error('Erro ao buscar dados dos sensores:', error)
   }
@@ -83,9 +94,9 @@ const fetchSensorData = async () => {
 onMounted(() => {
   fetchSensorData()
 
-  setInterval(() => {
-    fetchSensorData()
-  }, 5000)
+  socket.on('sensor-data', (newReading) => {
+    updateDashboard(newReading)
+  })
 })
 </script>
 
@@ -158,7 +169,7 @@ h1 {
 }
 
 .card {
-  background: #1f2937;
+  background: #005a10;
   border-radius: 12px;
   padding: 24px;
   min-width: 220px;

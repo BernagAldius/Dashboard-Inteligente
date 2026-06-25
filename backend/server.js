@@ -3,10 +3,20 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mqtt = require('mqtt');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173',
+        methods: ['GET', 'POST']
+    }
+});
 
 app.use(cors());
 
@@ -63,6 +73,16 @@ client.on('message', async (topic, message) => {
 
         console.log('Data saved to InfluxDB');
 
+        io.emit('sensor-data', {
+            time: data.timestamp,
+            sensor_id: data.sensor_id,
+            tipo: data.tipo,
+            temperatura: Number(data.temperatura),
+            humidade: Number(data.humidade)
+});
+
+console.log('Data sent to frontend via Socket.io');
+
     } catch (error) {
         console.error('Error processing MQTT message:', error.message);
     }
@@ -100,7 +120,7 @@ app.get('/sensor-data', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
