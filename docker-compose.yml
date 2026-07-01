@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   influxdb:
@@ -21,6 +19,28 @@ services:
     container_name: nodered
     ports:
       - "1880:1880"
+    volumes:
+      - nodered-data:/data
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env.docker
+    depends_on:
+      - influxdb
+      - mosquitto
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
 
 volumes:
   influxdb-data:
+  nodered-data:
