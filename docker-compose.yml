@@ -26,7 +26,7 @@ services:
     build: ./backend
     container_name: backend
     ports:
-      - "3000:3000"
+      - "3002:3000"
     env_file:
       - ./backend/.env.docker
     depends_on:
@@ -41,6 +41,46 @@ services:
     depends_on:
       - backend
 
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    depends_on:
+      - influxdb
+
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  orion:
+    image: fiware/orion
+    container_name: orion
+    ports:
+      - "1026:1026"
+    command: ["-dbURI", "mongodb://mongodb:27017"]
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
 volumes:
   influxdb-data:
   nodered-data:
+  grafana-data:
+  mongodb-data:

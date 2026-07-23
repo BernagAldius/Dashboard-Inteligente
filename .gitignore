@@ -1,5 +1,21 @@
+# Node.js
 node_modules
+
+# Environment variables
 .env
+.env.*
+backend/.env
+backend/.env.docker
+
+# Build output
 dist
+
+# IDE
 .vscode
+
+# macOS
 .DS_Store
+
+# Docker backups
+docker/backups/
+docker/mongodb-backup/

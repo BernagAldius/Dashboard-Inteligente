@@ -63,9 +63,50 @@ client.on('message', async (topic, message) => {
         const point = new Point('sensor_readings')
             .tag('sensor_id', data.sensor_id)
             .tag('tipo', data.tipo)
-            .floatField('temperatura', Number(data.temperatura))
-            .floatField('humidade', Number(data.humidade))
             .timestamp(new Date(data.timestamp));
+
+        // Guardar campos numéricos dinamicamente
+        Object.keys(data).forEach((key) => {
+            if (
+                key !== 'sensor_id' &&
+                key !== 'tipo' &&
+                key !== 'timestamp' &&
+                key !== 'analytics'
+            ) {
+                const value = data[key];
+
+                if (typeof value === 'number') {
+                    point.floatField(key, value);
+                }
+
+                if (typeof value === 'boolean') {
+                    point.booleanField(key, value);
+                }
+            }
+        });
+
+        // Guardar analytics, se existirem
+        if (data.analytics) {
+            Object.keys(data.analytics).forEach((key) => {
+                const value = data.analytics[key];
+
+                if (typeof value === 'number') {
+                    point.floatField(key, value);
+                }
+
+                if (typeof value === 'boolean') {
+                    point.booleanField(key, value);
+                }
+
+                if (typeof value === 'string') {
+                    point.stringField(key, value);
+                }
+
+                if (Array.isArray(value)) {
+                    point.stringField(key, JSON.stringify(value));
+                }
+            });
+        }
 
         writeApi.writePoint(point);
 
@@ -74,11 +115,8 @@ client.on('message', async (topic, message) => {
         console.log('Data saved to InfluxDB');
 
         io.emit('sensor-data', {
-            time: data.timestamp,
-            sensor_id: data.sensor_id,
-            tipo: data.tipo,
-            temperatura: Number(data.temperatura),
-            humidade: Number(data.humidade)
+  time: data.timestamp,
+  ...data
 });
 
 console.log('Data sent to frontend via Socket.io');
@@ -89,13 +127,11 @@ console.log('Data sent to frontend via Socket.io');
 });
 
 app.get('/sensor-data', async (req, res) => {
-
     const fluxQuery = `
         from(bucket: "${influxBucket}")
         |> range(start: -1h)
         |> filter(fn: (r) => r._measurement == "sensor_readings")
-        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-        |> keep(columns: ["_time", "temperatura", "humidade", "sensor_id", "tipo"])
+        |> pivot(rowKey:["_time", "sensor_id", "tipo"], columnKey: ["_field"], valueColumn: "_value")
     `;
 
     try {
@@ -106,11 +142,17 @@ app.get('/sensor-data', async (req, res) => {
             sensor_id: row.sensor_id,
             tipo: row.tipo,
             temperatura: row.temperatura,
-            humidade: row.humidade
+            humidade: row.humidade,
+            luminosidade: row.luminosidade,
+            movimento: row.movimento,
+            temperatura_media_movel: row.temperatura_media_movel,
+            humidade_media_movel: row.humidade_media_movel,
+            anomalia: row.anomalia,
+            tendencia: row.tendencia,
+            alertas: row.alertas
         }));
 
         res.json(results);
-
     } catch (error) {
         console.error(error);
 
