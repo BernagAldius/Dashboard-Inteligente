@@ -4,6 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const mqtt = require('mqtt');
 const http = require('http');
+const fs = require("fs");
+const path = require("path");
 const { Server } = require('socket.io');
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
@@ -40,6 +42,50 @@ const writeApi = influxDB.getWriteApi(influxOrg, influxBucket, 'ns');
 const queryApi = influxDB.getQueryApi(influxOrg);
 
 const client = mqtt.connect(mqttUrl);
+
+
+// ======================================================
+// CARREGAMENTO DA CONFIGURAÇÃO DO DASHBOARD
+// ======================================================
+
+function loadDashboardConfig() {
+    try {
+        const activeConfigPath = path.join(
+            '/config',
+            'active-config.json'
+        );
+
+        const activeConfig = JSON.parse(
+            fs.readFileSync(activeConfigPath, 'utf8')
+        );
+
+        const scenarioName = activeConfig.activeScenario;
+
+        const scenarioPath = path.join(
+            '/config',
+            `${scenarioName}.json`
+        );
+
+        const scenarioConfig = JSON.parse(
+            fs.readFileSync(scenarioPath, 'utf8')
+        );
+
+        return scenarioConfig;
+
+    } catch (error) {
+        console.error(
+            'Erro ao carregar configuração do dashboard:',
+            error.message
+        );
+
+        return null;
+    }
+}
+
+
+// ======================================================
+// MQTT
+// ======================================================
 
 client.on('connect', () => {
     console.log('Connected to MQTT Broker');
@@ -123,6 +169,57 @@ console.log('Data sent to frontend via Socket.io');
 
     } catch (error) {
         console.error('Error processing MQTT message:', error.message);
+    }
+});
+
+app.get('/dashboard-config', (req, res) => {
+    try {
+        const requestedScenario = req.query.scenario;
+
+        if (requestedScenario) {
+            const allowedScenarios = [
+                'industrial',
+                'domotica',
+                'agricultura'
+            ];
+
+            if (!allowedScenarios.includes(requestedScenario)) {
+                return res.status(400).json({
+                    error: 'Cenário inválido'
+                });
+            }
+
+            const scenarioPath = path.join(
+                '/config',
+                `${requestedScenario}.json`
+            );
+
+            const scenarioConfig = JSON.parse(
+                fs.readFileSync(scenarioPath, 'utf8')
+            );
+
+            return res.json(scenarioConfig);
+        }
+
+        const dashboardConfig = loadDashboardConfig();
+
+        if (!dashboardConfig) {
+            return res.status(500).json({
+                error: 'Não foi possível carregar a configuração do dashboard'
+            });
+        }
+
+        res.json(dashboardConfig);
+
+    } catch (error) {
+        console.error(
+            'Erro ao carregar cenário:',
+            error.message
+        );
+
+        res.status(500).json({
+            error: 'Erro ao carregar cenário'
+        });
     }
 });
 

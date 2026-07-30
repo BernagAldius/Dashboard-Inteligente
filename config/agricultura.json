@@ -1,0 +1,81 @@
+{
+  "scenario": {
+    "id": "agricultura",
+    "name": "Agricultura Inteligente",
+    "description": "Monitorização inteligente de um ambiente agrícola"
+  },
+
+  "zones": [
+    {
+      "id": "estufa",
+      "name": "Estufa",
+      "sensors": [
+        {
+          "id": "sensor_001",
+          "name": "Sensor Ambiental da Estufa",
+          "type": "ambiental",
+          "metrics": [
+            {
+              "field": "temperatura",
+              "label": "Temperatura",
+              "unit": "°C",
+              "alerts": {
+                "min": 10,
+                "max": 35
+              }
+            },
+            {
+              "field": "humidade",
+              "label": "Humidade",
+              "unit": "%",
+              "alerts": {
+                "min": 40,
+                "max": 85
+              }
+            }
+          ]
+        },
+        {
+          "id": "sensor_002",
+          "name": "Sensor de Luminosidade da Estufa",
+          "type": "luminosidade",
+          "metrics": [
+            {
+              "field": "luminosidade",
+              "label": "Luminosidade",
+              "unit": "lux",
+              "alerts": {
+                "min": 150,
+                "max": 900
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "zona_acesso",
+      "name": "Zona de Acesso",
+      "sensors": [
+        {
+          "id": "sensor_003",
+          "name": "Sensor de Movimento",
+          "type": "movimento",
+          "metrics": [
+            {
+              "field": "movimento",
+              "label": "Movimento",
+              "unit": "",
+              "data_type": "boolean",
+              "alerts": {
+                "high_activity": 7,
+                "persistent_activity": 9
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

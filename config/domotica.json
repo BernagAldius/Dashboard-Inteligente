@@ -1,0 +1,82 @@
+{
+  "scenario": {
+    "id": "domotica",
+    "name": "Casa Inteligente",
+    "description": "Monitorização e gestão de uma habitação inteligente"
+  },
+
+  "zones": [
+    {
+      "id": "sala",
+      "name": "Sala",
+      "sensors": [
+        {
+          "id": "sensor_001",
+          "name": "Sensor Ambiental da Sala",
+          "type": "ambiental",
+          "metrics": [
+            {
+              "field": "temperatura",
+              "label": "Temperatura",
+              "unit": "°C",
+              "alerts": {
+                "min": 15,
+                "max": 28
+              }
+            },
+            {
+              "field": "humidade",
+              "label": "Humidade",
+              "unit": "%",
+              "alerts": {
+                "min": 35,
+                "max": 70
+              }
+            }
+          ]
+        },
+
+        {
+          "id": "sensor_002",
+          "name": "Sensor de Luminosidade da Sala",
+          "type": "luminosidade",
+          "metrics": [
+            {
+              "field": "luminosidade",
+              "label": "Luminosidade",
+              "unit": "lux",
+              "alerts": {
+                "min": 100,
+                "max": 700
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "entrada",
+      "name": "Entrada",
+      "sensors": [
+        {
+          "id": "sensor_003",
+          "name": "Sensor de Movimento da Entrada",
+          "type": "movimento",
+          "metrics": [
+            {
+              "field": "movimento",
+              "label": "Movimento",
+              "unit": "",
+              "data_type": "boolean",
+              "alerts": {
+                "high_activity": 7,
+                "persistent_activity": 9
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

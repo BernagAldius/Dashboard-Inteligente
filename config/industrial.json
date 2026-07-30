@@ -1,0 +1,90 @@
+{
+  "scenario": {
+    "id": "industrial",
+    "name": "Ambiente Industrial",
+    "description": "Monitorização inteligente de um ambiente industrial"
+  },
+
+  "zones": [
+    {
+      "id": "zona_producao",
+      "name": "Zona de Produção",
+      "sensors": [
+        {
+          "id": "sensor_001",
+          "name": "Sensor Ambiental",
+          "type": "ambiental",
+
+          "metrics": [
+            {
+              "field": "temperatura",
+              "label": "Temperatura",
+              "unit": "°C",
+
+              "alerts": {
+                "min": 10,
+                "max": 30
+              }
+            },
+
+            {
+              "field": "humidade",
+              "label": "Humidade",
+              "unit": "%",
+
+              "alerts": {
+                "min": 35,
+                "max": 75
+              }
+            }
+          ]
+        },
+
+        {
+          "id": "sensor_002",
+          "name": "Sensor de Luminosidade",
+          "type": "luminosidade",
+
+          "metrics": [
+            {
+              "field": "luminosidade",
+              "label": "Luminosidade",
+              "unit": "lux",
+
+              "alerts": {
+                "min": 100,
+                "max": 800
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "zona_acesso",
+      "name": "Zona de Acesso",
+      "sensors": [
+        {
+          "id": "sensor_003",
+          "name": "Sensor de Movimento",
+          "type": "movimento",
+
+          "metrics": [
+            {
+              "field": "movimento",
+              "label": "Movimento",
+              "unit": "",
+              "data_type": "boolean",
+
+              "alerts": {
+                "high_activity": 7,
+                "persistent_activity": 9
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

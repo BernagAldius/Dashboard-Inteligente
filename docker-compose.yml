@@ -29,6 +29,8 @@ services:
       - "3002:3000"
     env_file:
       - ./backend/.env.docker
+    volumes:
+      - ./config:/config:ro
     depends_on:
       - influxdb
       - mosquitto
@@ -52,6 +54,7 @@ services:
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource
     depends_on:
       - influxdb
 
