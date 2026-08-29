@@ -2,13 +2,15 @@
 
 ## Descrição
 
-O Dashboard Inteligente IoT é uma plataforma modular para monitorização, análise e visualização de dados provenientes de sensores IoT.
+O Dashboard Inteligente IoT é uma aplicação desenvolvida para monitorização e análise de dados provenientes de diferentes tipos de sensores.
 
-O sistema permite simular diferentes tipos de sensores através do Node-RED, transmitir dados utilizando MQTT, armazenar séries temporais no InfluxDB e visualizar a informação através de dashboards configuráveis em Grafana.
+O sistema utiliza MQTT para comunicação, Node-RED para simulação e processamento dos sensores, InfluxDB para armazenamento temporal dos dados e Grafana como principal interface de monitorização e visualização.
 
-A plataforma inclui ainda integração com FIWARE Orion Context Broker, permitindo representar sensores e respetivos dados através de entidades de contexto.
+A dashboard foi generalizada para permitir a utilização do mesmo sistema em diferentes cenários de aplicação, nomeadamente Domótica, Ambiente Industrial e Agricultura Inteligente.
 
-A arquitetura encontra-se contentorizada com Docker e Docker Compose, facilitando a instalação, portabilidade e execução dos diferentes componentes do sistema.
+Através do Grafana, o utilizador pode selecionar o cenário e a métrica que pretende analisar. A configuração apresentada é adaptada automaticamente, incluindo sensores, limites mínimos e máximos, unidades de medida e zonas associadas ao cenário.
+
+A arquitetura foi desenvolvida utilizando Docker, facilitando a instalação, portabilidade, persistência dos serviços e futura migração entre sistemas operativos Windows e Linux.
 
 ---
 
@@ -16,54 +18,46 @@ A arquitetura encontra-se contentorizada com Docker e Docker Compose, facilitand
 
 O projeto pretende:
 
-- Monitorizar dados provenientes de sensores IoT.
-- Suportar diferentes tipos de sensores e métricas.
-- Armazenar o histórico das leituras.
-- Processar e analisar dados provenientes dos sensores.
-- Identificar tendências, limites e possíveis anomalias.
+- Monitorizar diferentes tipos de sensores em tempo real.
+- Armazenar o histórico das leituras em InfluxDB.
+- Processar dados através de Node-RED.
+- Aplicar regras de análise, deteção de tendências, médias móveis e identificação de anomalias.
 - Disponibilizar uma API para consulta dos dados.
-- Disponibilizar atualização de dados em tempo real.
-- Permitir a configuração dinâmica do dashboard.
-- Suportar diferentes cenários de utilização.
-- Integrar tecnologias FIWARE para gestão de contexto IoT.
-- Permitir futura integração com sensores físicos, como ESP32 ou Raspberry Pi.
-- Garantir uma arquitetura modular e portável através de Docker.
+- Utilizar Grafana como interface principal de monitorização.
+- Permitir a configuração dinâmica da dashboard para diferentes cenários.
+- Adaptar sensores, métricas, limites, unidades e zonas ao cenário selecionado.
+- Controlar a visibilidade dos painéis de acordo com a métrica e o cenário selecionados.
+- Manter uma arquitetura modular e contentorizada através de Docker.
+- Preparar o sistema para futura integração com sensores físicos e métodos de análise avançada de dados.
 
 ---
 
-# Arquitetura
-
-A arquitetura atual do sistema pode ser representada de forma simplificada por:
+## Arquitetura
 
 ```text
-                  Node-RED
-          (Simulação de Sensores)
-                       │
-                       │
-              Análise dos Dados
-                       │
-              ┌────────┴────────┐
-              │                 │
-              ▼                 ▼
-       MQTT / Mosquitto      FIWARE
-              │            Orion Context
-              │               Broker
-              ▼                 │
-       Backend Node.js          │
-              │                 │
-       ┌──────┴───────┐         │
-       │              │         │
-       ▼              ▼         ▼
-   InfluxDB        Socket.io   MongoDB
-       │              │
-       │              ▼
-       │          Frontend Vue
-       │
-       ▼
-     Grafana
-       │
-       ▼
-Dashboard Inteligente
+Sensores simulados / Node-RED
+            │
+            ▼
+      MQTT (Mosquitto)
+            │
+            ▼
+      Backend Node.js
+            │
+            ├──────────────► InfluxDB
+            │                    │
+            │                    ▼
+            │                 Grafana
+            │
+            ├──────────────► Socket.io
+            │                    │
+            │                    ▼
+            │                Frontend Vue
+            │
+            ▼
+       FIWARE Orion
+            │
+            ▼
+         MongoDB
 ```
 
 O Node-RED é atualmente utilizado para simular diferentes sensores e realizar processamento inicial dos dados.
@@ -80,18 +74,17 @@ Paralelamente, existe integração com o FIWARE Orion Context Broker, utilizando
 
 | Tecnologia | Função |
 |------------|--------|
-| Grafana OSS | Dashboard principal e visualização dinâmica |
-| Vue.js 3 | Frontend web complementar |
-| ApexCharts | Visualização de gráficos no frontend Vue |
+| Grafana OSS | Dashboard principal e visualização dos dados |
+| Vue.js 3 | Frontend complementar |
 | Node.js | Backend |
 | Express | API REST |
-| Socket.io | Comunicação em tempo real |
-| Node-RED | Simulação e processamento de sensores |
-| MQTT / Mosquitto | Comunicação entre sensores e backend |
+| Socket.io | Comunicação em tempo real com o frontend Vue |
+| Node-RED | Simulação, processamento e análise dos sensores |
+| MQTT (Mosquitto) | Comunicação entre sensores e backend |
 | InfluxDB 2 | Base de dados temporal |
-| FIWARE Orion | Context Broker para integração IoT |
-| MongoDB | Persistência utilizada pelo FIWARE Orion |
-| Docker | Contentorização dos componentes |
+| FIWARE Orion | Context Broker para gestão de entidades IoT |
+| MongoDB | Persistência de dados do FIWARE Orion |
+| Docker Desktop | Contentorização |
 | Docker Compose | Orquestração dos serviços |
 | Git | Controlo de versões |
 | GitHub | Repositório remoto |
@@ -327,6 +320,48 @@ Dashboard-Inteligente
 
 ---
 
+# Dashboard Dinâmica e Cenários
+
+A dashboard Grafana foi generalizada para permitir a reutilização da mesma interface em diferentes contextos de aplicação.
+
+Atualmente estão configurados três cenários:
+
+- Domótica
+- Ambiente Industrial
+- Agricultura Inteligente
+
+Para cada cenário podem ser definidos:
+
+- sensores disponíveis;
+- métricas disponíveis;
+- zonas;
+- limites mínimos e máximos;
+- unidades de medida.
+
+As principais métricas atualmente utilizadas são:
+
+- Temperatura
+- Humidade
+- Luminosidade
+
+A informação apresentada no Grafana é atualizada dinamicamente de acordo com o cenário e a métrica selecionados.
+
+Foram também implementadas regras de visibilidade condicional através de Rows do Grafana. Desta forma, os painéis associados a Temperatura, Humidade e Luminosidade são apresentados apenas quando a respetiva métrica é selecionada.
+
+Foram igualmente criadas Rows específicas para:
+
+- Análise — Domótica
+- Análise — Industrial
+- Análise — Agricultura
+
+Estas Rows são apresentadas apenas quando o respetivo cenário está ativo, permitindo adicionar futuramente análises ou visualizações específicas de cada contexto sem duplicar toda a dashboard.
+
+A funcionalidade foi validada através das nove combinações entre os três cenários e as três principais métricas.
+
+A monitorização de movimento permanece implementada no sistema, mas encontra-se temporariamente fora da visualização principal da dashboard.
+
+---
+
 # Serviços e Portas
 
 A configuração atual utiliza os seguintes serviços:
@@ -350,32 +385,48 @@ A configuração atual utiliza os seguintes serviços:
 
 ## Funcionalidades implementadas
 
-- Arquitetura contentorizada com Docker Compose.
-- Backend Node.js.
-- API REST.
-- Frontend Vue.js.
-- Comunicação MQTT através do Mosquitto.
-- Armazenamento temporal através do InfluxDB.
-- Atualização em tempo real através de Socket.io.
-- Simulação de sensores através do Node-RED.
-- Sensores de temperatura, humidade, luminosidade e movimento.
-- Processamento e análise básica no Node-RED.
-- Cálculo de médias móveis.
-- Deteção de tendências.
-- Deteção de variações e anomalias.
-- Grafana OSS integrado no projeto.
-- Dashboard Grafana dinâmico.
-- Integração com FIWARE Orion Context Broker.
-- MongoDB integrado para suporte ao Orion.
-- Configuração de múltiplos cenários.
-- Seleção dinâmica de sensores e métricas.
-- Limites mínimo e máximo dependentes do cenário/métrica.
-- Unidades dinâmicas.
-- Painéis com títulos dinâmicos.
-- Histórico das métricas.
-- Visualização do valor atual.
-- Classificação automática do estado da métrica.
-- Backup do fluxo Node-RED.
+Foram implementados:
+
+- múltiplos cenários;
+- configuração dinâmica dos sensores;
+- configuração dinâmica das métricas;
+- unidades dependentes da métrica;
+- limites dependentes do cenário e da métrica;
+- títulos e visualizações dinâmicas;
+- histórico e valor atual das métricas;
+- classificação automática do estado da métrica;
+- Organização dos painéis através de Rows no Grafana.
+- Visibilidade condicional dos painéis de acordo com a métrica selecionada.
+- Visibilidade condicional de Rows específicas de acordo com o cenário selecionado.
+- Validação das nove combinações entre os três cenários e as três principais métricas.
+- representação visual dos diferentes estados;
+- organização dos painéis através de Rows;
+- visibilidade condicional dos painéis de acordo com a métrica selecionada;
+- visibilidade condicional de Rows específicas de acordo com o cenário selecionado.
+
+Foram realizados testes com as métricas:
+
+- Temperatura
+- Humidade
+- Luminosidade
+
+nos cenários:
+
+- Casa Inteligente / Domótica
+- Agricultura Inteligente
+- Ambiente Industrial
+
+As nove combinações entre os três cenários e as três métricas foram testadas, confirmando que o dashboard adapta corretamente o cenário, sensor, métrica, unidade, limites e visualização apresentada.
+
+Foram também criadas Rows específicas para análises futuras de cada cenário:
+
+- Análise — Domótica
+- Análise — Industrial
+- Análise — Agricultura
+
+Estas Rows são apresentadas apenas quando o respetivo cenário se encontra selecionado.
+
+A funcionalidade de movimento permanece implementada no sistema, mas foi temporariamente retirada da visualização principal da dashboard, mantendo-se disponível para futura utilização.
 
 ---
 
@@ -434,7 +485,7 @@ visualização
 estado
 ```
 
-A decisão sobre a utilização da métrica de movimento na experiência principal permanece em pausa até validação com o orientador.
+A funcionalidade de movimento permanece implementada no sistema, mas encontra-se temporariamente fora da visualização principal da dashboard.
 
 ---
 
