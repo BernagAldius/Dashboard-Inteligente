@@ -35,6 +35,17 @@ services:
       - influxdb
       - mosquitto
 
+  analytics:
+    build: ./analytics
+    container_name: analytics
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./analytics/.env.docker
+    depends_on:
+      - influxdb
+      - mosquitto
+
   frontend:
     build: ./frontend
     container_name: frontend

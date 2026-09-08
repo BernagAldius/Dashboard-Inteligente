@@ -487,6 +487,31 @@ estado
 
 A funcionalidade de movimento permanece implementada no sistema, mas encontra-se temporariamente fora da visualização principal da dashboard.
 
+# Semana 16 — Análise Avançada com Python
+
+Durante a Semana 16 foi desenvolvida a componente de análise avançada de dados do sistema, complementando a análise baseada em regras já existente no Node-RED.
+
+Para esta componente foi criado um serviço independente denominado **Python Analytics**, desenvolvido em Python e integrado na arquitetura através de Docker.
+
+O serviço obtém os dados históricos armazenados no InfluxDB e disponibiliza os resultados das análises através de uma API REST, posteriormente utilizada pelo Grafana para visualização.
+
+## Arquitetura da análise
+
+A divisão de responsabilidades ficou definida da seguinte forma:
+
+```text
+Sensores / Simulação
+        ↓
+      MQTT
+        ↓
+    Node-RED
+        ↓
+    InfluxDB
+        ↓
+Python Analytics
+        ↓
+      Grafana
+
 ---
 
 # Requisitos
@@ -552,6 +577,7 @@ Depois de iniciar os contentores:
 | FIWARE Orion | `http://localhost:1026` |
 | Node-RED | `http://localhost:1880` |
 | InfluxDB | `http://localhost:8086` |
+| Python Analytics | `http://localhost:5000` |
 
 Para confirmar que o Orion está operacional:
 
