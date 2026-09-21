@@ -14,8 +14,14 @@ INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 INFLUX_ORG = os.getenv("INFLUX_ORG")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
 
+SENSOR_MAP = {
+    "temperatura": "sensor_001",
+    "humidade": "sensor_001",
+    "luminosidade": "sensor_002"
+}
 
-def get_temperature_data():
+
+def get_sensor_data(sensor_id, metric):
     client = InfluxDBClient(
         url=INFLUX_URL,
         token=INFLUX_TOKEN,
@@ -26,8 +32,8 @@ def get_temperature_data():
     from(bucket: "{INFLUX_BUCKET}")
       |> range(start: -1h)
       |> filter(fn: (r) => r._measurement == "sensor_readings")
-      |> filter(fn: (r) => r.sensor_id == "sensor_001")
-      |> filter(fn: (r) => r._field == "temperatura")
+      |> filter(fn: (r) => r.sensor_id == "{sensor_id}")
+      |> filter(fn: (r) => r._field == "{metric}")
       |> tail(n: 20)
     '''
 
@@ -58,7 +64,7 @@ def health():
 @app.route("/temperature", methods=["GET"])
 def temperature():
     try:
-        values = get_temperature_data()
+        values = get_sensor_data("sensor_001", "temperatura")
 
         return jsonify({
             "sensor_id": "sensor_001",
@@ -72,11 +78,52 @@ def temperature():
             "error": str(error)
         }), 500
 
-
-@app.route("/zscore", methods=["GET"])
-def zscore():
+@app.route("/humidity", methods=["GET"])
+def humidity():
     try:
-        values = get_temperature_data()
+        values = get_sensor_data("sensor_001", "humidade")
+
+        return jsonify({
+            "sensor_id": "sensor_001",
+            "metric": "humidade",
+            "count": len(values),
+            "data": values
+        })
+
+    except Exception as error:
+        return jsonify({
+            "error": str(error)
+        }), 500
+
+@app.route("/luminosity", methods=["GET"])
+def luminosity():
+    try:
+        values = get_sensor_data("sensor_002", "luminosidade")
+
+        return jsonify({
+            "sensor_id": "sensor_002",
+            "metric": "luminosidade",
+            "count": len(values),
+            "data": values
+        })
+
+    except Exception as error:
+        return jsonify({
+            "error": str(error)
+        }), 500
+
+@app.route("/zscore/<metric>", methods=["GET"])
+def zscore(metric):
+    try:
+
+        if metric not in SENSOR_MAP:
+            return jsonify({
+                "error": "Métrica inválida"
+            }), 400
+
+        sensor_id = SENSOR_MAP[metric]
+
+        values = get_sensor_data(sensor_id, metric)
 
         if len(values) < 2:
             return jsonify({
@@ -107,8 +154,8 @@ def zscore():
             })
 
         return jsonify({
-            "sensor_id": "sensor_001",
-            "metric": "temperatura",
+            "sensor_id": sensor_id,
+            "metric": metric,
             "method": "z-score",
             "threshold": 2,
             "mean": round(float(mean), 3),
@@ -122,10 +169,17 @@ def zscore():
             "error": str(error)
         }), 500
 
-@app.route("/isolation-forest", methods=["GET"])
-def isolation_forest():
+@app.route("/isolation-forest/<metric>", methods=["GET"])
+def isolation_forest(metric):
     try:
-        values = get_temperature_data()
+        if metric not in SENSOR_MAP:
+            return jsonify({
+                "error": "Métrica inválida"
+            }), 400
+
+        sensor_id = SENSOR_MAP[metric]
+
+        values = get_sensor_data(sensor_id, metric)
 
         if len(values) < 5:
             return jsonify({
@@ -156,8 +210,8 @@ def isolation_forest():
             })
 
         return jsonify({
-            "sensor_id": "sensor_001",
-            "metric": "temperatura",
+            "sensor_id": sensor_id,
+            "metric": metric,
             "method": "isolation-forest",
             "contamination": 0.05,
             "count": len(results),
@@ -172,7 +226,7 @@ def isolation_forest():
 @app.route("/forecast", methods=["GET"])
 def forecast():
     try:
-        values = get_temperature_data()
+        values = get_sensor_data("sensor_001", "temperatura")
 
         if len(values) < 5:
             return jsonify({

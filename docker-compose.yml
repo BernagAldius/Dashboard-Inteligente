@@ -21,6 +21,9 @@ services:
       - "1880:1880"
     volumes:
       - nodered-data:/data
+    depends_on:
+      orion:
+        condition: service_healthy
 
   backend:
     build: ./backend
@@ -88,7 +91,12 @@ services:
     container_name: orion
     ports:
       - "1026:1026"
-    command: ["-dbURI", "mongodb://mongodb:27017"]
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        rm -f /tmp/contextBroker.pid
+        exec /usr/bin/contextBroker -fg -multiservice -disableFileLog -dbURI mongodb://mongodb:27017
     depends_on:
       mongodb:
         condition: service_healthy

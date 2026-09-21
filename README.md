@@ -608,3 +608,28 @@ docker compose up -d --build
 ```
 
 ---
+
+# Semana 17 — Consolidação e Estabilização
+
+Durante a Semana 17 foi realizada a consolidação da camada inteligente do sistema, a validação da integração entre os diferentes serviços e a estabilização do ambiente Docker.
+
+## Integração da Camada Inteligente
+
+Foi validado o fluxo completo de dados entre os principais componentes do sistema:
+
+```text
+Sensores simulados
+        ↓
+     Node-RED
+        ↓
+      MQTT
+        ↓
+     Backend
+        ↓
+    InfluxDB
+        ↓
+Python Analytics
+        ↓
+     Grafana
+
+     
