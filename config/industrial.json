@@ -5,6 +5,15 @@
     "description": "Monitorização inteligente de um ambiente industrial"
   },
 
+  "dashboard": {
+    "charts": {
+      "temperatura": true,
+      "humidade": true,
+      "luminosidade": true,
+      "movimento": false
+    }
+  },
+
   "zones": [
     {
       "id": "zona_producao",

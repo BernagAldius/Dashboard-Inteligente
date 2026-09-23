@@ -5,6 +5,15 @@
     "description": "Monitorização e gestão de uma habitação inteligente"
   },
 
+  "dashboard": {
+    "charts": {
+      "temperatura": true,
+      "humidade": true,
+      "luminosidade": true,
+      "movimento": false
+    }
+  },
+
   "zones": [
     {
       "id": "sala",

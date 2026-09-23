@@ -632,4 +632,225 @@ Python Analytics
         ↓
      Grafana
 
-     
+# Configuração do Dashboard
+
+O sistema permite adaptar o dashboard a diferentes cenários através de ficheiros JSON localizados na pasta `config/`, sem necessidade de alterar o código da aplicação.
+
+## Seleção do cenário ativo
+
+O ficheiro `config/active-config.json` define o cenário ativo por defeito.
+
+Exemplo:
+
+```json
+{
+  "activeScenario": "agricultura"
+}
+```
+
+Os cenários atualmente disponíveis são:
+
+- `industrial`
+- `domotica`
+- `agricultura`
+
+Cada cenário possui o respetivo ficheiro de configuração:
+
+```text
+config/
+├── active-config.json
+├── industrial.json
+├── domotica.json
+└── agricultura.json
+```
+
+## Ativação e desativação de gráficos
+
+Cada ficheiro de cenário contém a secção `dashboard.charts`, que permite definir quais as métricas apresentadas no dashboard.
+
+Exemplo:
+
+```json
+"dashboard": {
+  "charts": {
+    "temperatura": true,
+    "humidade": true,
+    "luminosidade": true,
+    "movimento": false
+  }
+}
+```
+
+O valor `true` permite a apresentação dos gráficos associados à métrica.
+
+O valor `false` oculta esses gráficos.
+
+Desta forma, o dashboard pode ser adaptado às necessidades de cada cenário através do ficheiro de configuração, sem necessidade de modificar os painéis ou o código da aplicação.
+
+## Zonas
+
+A propriedade `zones` permite organizar os sensores por zonas do cenário.
+
+Exemplo:
+
+```json
+{
+  "id": "estufa",
+  "name": "Estufa",
+  "sensors": []
+}
+```
+
+As zonas definidas no ficheiro são apresentadas dinamicamente no dashboard.
+
+Por exemplo:
+
+- Industrial: Zona de Produção e Zona de Acesso
+- Domótica: Sala e Entrada
+- Agricultura: Estufa e Zona de Acesso
+
+## Sensores e métricas
+
+Cada zona pode conter um ou mais sensores através da propriedade `sensors`.
+
+Cada sensor possui:
+
+- identificador (`id`);
+- nome (`name`);
+- tipo (`type`);
+- métricas (`metrics`).
+
+As métricas permitem definir o campo monitorizado, nome apresentado, unidade e limites associados.
+
+Exemplo:
+
+```json
+{
+  "field": "temperatura",
+  "label": "Temperatura",
+  "unit": "°C",
+  "alerts": {
+    "min": 10,
+    "max": 35
+  }
+}
+```
+
+## Limites
+
+Os limites configurados em `alerts.min` e `alerts.max` são utilizados pelo sistema para avaliar o estado das métricas.
+
+Exemplo:
+
+```json
+"alerts": {
+  "min": 10,
+  "max": 35
+}
+```
+
+Neste exemplo, a temperatura possui um intervalo configurado entre `10 °C` e `35 °C`.
+
+Os limites podem variar entre cenários e são utilizados dinamicamente pelo dashboard e pela camada de análise baseada em regras.
+
+## Procedimento básico de configuração
+
+Para adaptar o sistema:
+
+1. Selecionar o cenário em `config/active-config.json`.
+2. Editar o respetivo ficheiro de cenário, se necessário.
+3. Definir as zonas e sensores pretendidos.
+4. Configurar métricas, unidades e limites.
+5. Definir em `dashboard.charts` quais os gráficos que devem ser apresentados.
+6. Guardar os ficheiros de configuração.
+7. Iniciar o ambiente:
+
+```bash
+docker compose up -d
+```
+
+8. Aceder ao Grafana em `http://localhost:3001`.
+9. No seletor `Cenário`, selecionar o cenário que se pretende visualizar.
+10. Confirmar que as zonas, sensores, métricas, limites e gráficos apresentados correspondem ao ficheiro de configuração desse cenário.
+
+> **Nota:** O ficheiro `active-config.json` define o cenário ativo utilizado pelo sistema e pela camada de processamento. O Grafana mantém um seletor de cenário independente, permitindo ao utilizador consultar manualmente qualquer um dos cenários disponíveis. Por esse motivo, após alterar o cenário ativo, deve ser selecionado no Grafana o cenário correspondente quando se pretende visualizar a mesma configuração.
+
+## Demonstração da configuração
+
+A seguinte sequência pode ser utilizada para demonstrar a adaptação do sistema através dos ficheiros de configuração.
+
+### 1. Estado inicial
+
+Confirmar que o cenário ativo é `domotica`:
+
+```powershell
+Get-Content .\config\active-config.json
+```
+
+No Grafana, selecionar `domotica` e mostrar:
+
+- cenário `Casa Inteligente`;
+- zonas `Sala` e `Entrada`;
+- sensores associados ao cenário;
+- limites configurados para as métricas.
+
+### 2. Alterar o cenário ativo
+
+Editar o ficheiro `config/active-config.json` e alterar o cenário ativo para:
+
+```json
+{
+  "activeScenario": "agricultura"
+}
+```
+
+Guardar o ficheiro.
+
+### 3. Iniciar ou atualizar o ambiente
+
+Executar:
+
+```powershell
+docker compose up -d
+```
+
+Este comando inicia os serviços necessários ou atualiza o ambiente caso estes já se encontrem em execução.
+
+### 4. Confirmar a configuração carregada
+
+Executar:
+
+```powershell
+(Invoke-RestMethod http://localhost:3002/dashboard-config).scenario
+```
+
+O sistema deverá indicar o cenário `agricultura`, com o nome `Agricultura Inteligente`.
+
+### 5. Verificar o dashboard
+
+No Grafana, selecionar `agricultura`.
+
+Confirmar:
+
+- cenário `Agricultura Inteligente`;
+- zonas `Estufa` e `Zona de Acesso`;
+- sensores associados ao cenário;
+- limites configurados para Agricultura.
+
+### 6. Demonstrar a configuração dos gráficos
+
+Abrir o ficheiro `config/agricultura.json` e mostrar a secção:
+
+```json
+"dashboard": {
+  "charts": {
+    "temperatura": true,
+    "humidade": true,
+    "luminosidade": true,
+    "movimento": false
+  }
+}
+```
+
+Os valores `true` e `false` permitem ativar ou ocultar as áreas correspondentes às métricas no dashboard sem modificar o código da aplicação. Esta funcionalidade permite adaptar a interface às necessidades de cada cenário.
+
