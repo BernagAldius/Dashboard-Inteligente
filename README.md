@@ -779,24 +779,29 @@ docker compose up -d
 
 A seguinte sequência pode ser utilizada para demonstrar a adaptação do sistema através dos ficheiros de configuração.
 
-### 1. Estado inicial
+### 1. Verificar o cenário ativo
 
-Confirmar que o cenário ativo é `domotica`:
+Antes de iniciar a demonstração, verificar qual o cenário atualmente definido em `config/active-config.json`:
 
 ```powershell
 Get-Content .\config\active-config.json
 ```
 
-No Grafana, selecionar `domotica` e mostrar:
+O ficheiro deverá indicar um dos cenários disponíveis:
 
-- cenário `Casa Inteligente`;
-- zonas `Sala` e `Entrada`;
-- sensores associados ao cenário;
-- limites configurados para as métricas.
+- `domotica`
+- `industrial`
+- `agricultura`
+
+O cenário apresentado corresponde à configuração atualmente selecionada pelo sistema.
 
 ### 2. Alterar o cenário ativo
 
-Editar o ficheiro `config/active-config.json` e alterar o cenário ativo para:
+Para demonstrar a configuração dinâmica do sistema, selecionar um cenário diferente do atualmente definido.
+
+Editar o ficheiro `config/active-config.json` e definir um dos cenários disponíveis.
+
+Por exemplo:
 
 ```json
 {
@@ -804,7 +809,9 @@ Editar o ficheiro `config/active-config.json` e alterar o cenário ativo para:
 }
 ```
 
-Guardar o ficheiro.
+Se `agricultura` já for o cenário ativo, pode ser utilizado `domotica` ou `industrial`.
+
+Guardar o ficheiro antes de iniciar ou atualizar o ambiente.
 
 ### 3. Iniciar ou atualizar o ambiente
 
@@ -814,7 +821,7 @@ Executar:
 docker compose up -d
 ```
 
-Este comando inicia os serviços necessários ou atualiza o ambiente caso estes já se encontrem em execução.
+Este comando inicia os serviços necessários. Caso os contentores já se encontrem em execução, o Docker Compose mantém os serviços ativos, permitindo que a configuração guardada seja utilizada pelo sistema.
 
 ### 4. Confirmar a configuração carregada
 
@@ -824,22 +831,42 @@ Executar:
 (Invoke-RestMethod http://localhost:3002/dashboard-config).scenario
 ```
 
-O sistema deverá indicar o cenário `agricultura`, com o nome `Agricultura Inteligente`.
+O comando apresenta a identificação (`id`), o nome (`name`) e a descrição (`description`) do cenário atualmente carregado pelo sistema.
+
+Confirmar que o cenário apresentado corresponde ao valor definido anteriormente em `config/active-config.json`.
 
 ### 5. Verificar o dashboard
 
-No Grafana, selecionar `agricultura`.
+Aceder ao Grafana em:
 
-Confirmar:
+```text
+http://localhost:3001
+```
 
-- cenário `Agricultura Inteligente`;
-- zonas `Estufa` e `Zona de Acesso`;
-- sensores associados ao cenário;
-- limites configurados para Agricultura.
+No seletor `Cenário`, selecionar o mesmo cenário definido anteriormente em `config/active-config.json`.
 
-### 6. Demonstrar a configuração dos gráficos
+Confirmar que o dashboard apresenta corretamente:
 
-Abrir o ficheiro `config/agricultura.json` e mostrar a secção:
+- o nome do cenário;
+- as zonas configuradas;
+- os sensores associados;
+- as métricas disponíveis;
+- as unidades de medida;
+- os limites mínimos e máximos definidos.
+
+O seletor de cenário do Grafana é independente do cenário ativo do sistema, permitindo consultar manualmente qualquer um dos cenários disponíveis.
+
+### 6. Demonstrar a ativação e desativação de gráficos
+
+Abrir o ficheiro de configuração correspondente ao cenário selecionado:
+
+- `config/domotica.json`
+- `config/industrial.json`
+- `config/agricultura.json`
+
+Deve ser editado o ficheiro correspondente ao cenário definido anteriormente em `config/active-config.json`.
+
+Localizar a secção `dashboard.charts`:
 
 ```json
 "dashboard": {
@@ -852,5 +879,77 @@ Abrir o ficheiro `config/agricultura.json` e mostrar a secção:
 }
 ```
 
-Os valores `true` e `false` permitem ativar ou ocultar as áreas correspondentes às métricas no dashboard sem modificar o código da aplicação. Esta funcionalidade permite adaptar a interface às necessidades de cada cenário.
+Para ocultar os gráficos associados a uma métrica, alterar o respetivo valor de `true` para `false`.
+
+Por exemplo:
+
+```json
+"luminosidade": false
+```
+
+Guardar o ficheiro e executar:
+
+```powershell
+docker compose up -d
+```
+
+No Grafana, atualizar o dashboard e selecionar a métrica alterada.
+
+Confirmar que a métrica continua disponível na configuração do cenário, mas que a respetiva área de gráficos deixa de ser apresentada.
+
+Para voltar a apresentar os gráficos, alterar novamente o valor para:
+
+```json
+"luminosidade": true
+```
+
+Guardar o ficheiro, executar novamente:
+
+```powershell
+docker compose up -d
+```
+
+e atualizar o dashboard no Grafana.
+
+A área de gráficos correspondente deverá voltar a ser apresentada.
+
+Este procedimento permite adaptar a interface às necessidades de cada cenário através dos ficheiros de configuração, sem modificar o código da aplicação ou os painéis do Grafana.
+
+### 7. Demonstrar a alteração dos limites
+
+Os limites de cada métrica podem ser alterados através das propriedades `alerts.min` e `alerts.max` do respetivo ficheiro de cenário.
+
+Por exemplo, para uma métrica de luminosidade:
+
+```json
+"alerts": {
+  "min": 100,
+  "max": 700
+}
+```
+
+Para demonstrar a configuração dinâmica dos limites, estes valores podem ser temporariamente alterados, por exemplo, para:
+
+```json
+"alerts": {
+  "min": 200,
+  "max": 600
+}
+```
+
+Guardar o ficheiro e executar:
+
+```powershell
+docker compose up -d
+```
+
+No Grafana, atualizar o dashboard e selecionar o cenário e a métrica correspondentes.
+
+Confirmar que os novos limites mínimo e máximo são apresentados no dashboard.
+
+Quando o valor atual da métrica se encontrar fora do intervalo configurado, o sistema deverá refletir essa situação através do estado da métrica e da análise baseada em regras.
+
+Por exemplo, para um limite máximo de `600 lux`, uma leitura superior a esse valor deverá ser identificada como estando acima do limite.
+
+Este teste demonstra que os limites podem ser adaptados através dos ficheiros de configuração sem necessidade de modificar o código da aplicação.
 
