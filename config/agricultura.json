@@ -4,7 +4,6 @@
     "name": "Agricultura Inteligente",
     "description": "Monitorização inteligente de um ambiente agrícola"
   },
-
   "dashboard": {
     "charts": {
       "temperatura": true,
@@ -13,7 +12,6 @@
       "movimento": false
     }
   },
-
   "zones": [
     {
       "id": "estufa",
@@ -29,8 +27,8 @@
               "label": "Temperatura",
               "unit": "°C",
               "alerts": {
-                "min": 10,
-                "max": 35
+                "min": 10.0,
+                "max": 35.0
               }
             },
             {
@@ -38,8 +36,8 @@
               "label": "Humidade",
               "unit": "%",
               "alerts": {
-                "min": 40,
-                "max": 85
+                "min": 40.0,
+                "max": 85.0
               }
             }
           ]
@@ -54,15 +52,14 @@
               "label": "Luminosidade",
               "unit": "lux",
               "alerts": {
-                "min": 150,
-                "max": 900
+                "min": 150.0,
+                "max": 900.0
               }
             }
           ]
         }
       ]
     },
-
     {
       "id": "zona_acesso",
       "name": "Zona de Acesso",

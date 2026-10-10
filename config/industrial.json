@@ -4,7 +4,6 @@
     "name": "Ambiente Industrial",
     "description": "Monitorização inteligente de um ambiente industrial"
   },
-
   "dashboard": {
     "charts": {
       "temperatura": true,
@@ -13,7 +12,6 @@
       "movimento": false
     }
   },
-
   "zones": [
     {
       "id": "zona_producao",
@@ -23,53 +21,45 @@
           "id": "sensor_001",
           "name": "Sensor Ambiental",
           "type": "ambiental",
-
           "metrics": [
             {
               "field": "temperatura",
               "label": "Temperatura",
               "unit": "°C",
-
               "alerts": {
-                "min": 10,
-                "max": 30
+                "min": 10.0,
+                "max": 30.0
               }
             },
-
             {
               "field": "humidade",
               "label": "Humidade",
               "unit": "%",
-
               "alerts": {
-                "min": 35,
-                "max": 75
+                "min": 35.0,
+                "max": 75.0
               }
             }
           ]
         },
-
         {
           "id": "sensor_002",
           "name": "Sensor de Luminosidade",
           "type": "luminosidade",
-
           "metrics": [
             {
               "field": "luminosidade",
               "label": "Luminosidade",
               "unit": "lux",
-
               "alerts": {
-                "min": 100,
-                "max": 800
+                "min": 100.0,
+                "max": 800.0
               }
             }
           ]
         }
       ]
     },
-
     {
       "id": "zona_acesso",
       "name": "Zona de Acesso",
@@ -78,14 +68,12 @@
           "id": "sensor_003",
           "name": "Sensor de Movimento",
           "type": "movimento",
-
           "metrics": [
             {
               "field": "movimento",
               "label": "Movimento",
               "unit": "",
               "data_type": "boolean",
-
               "alerts": {
                 "high_activity": 7,
                 "persistent_activity": 9

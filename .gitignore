@@ -19,3 +19,5 @@ dist
 # Docker backups
 docker/backups/
 docker/mongodb-backup/
+
+config/*.json.bak

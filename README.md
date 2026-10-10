@@ -1,3 +1,58 @@
+- [Dashboard Inteligente IoT](#dashboard-inteligente-iot)
+  - [Descrição](#descrição)
+  - [Objetivos](#objetivos)
+  - [Arquitetura](#arquitetura)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
+  - [Sensores e Métricas](#sensores-e-métricas)
+  - [Processamento e Análise no Node-RED](#processamento-e-análise-no-node-red)
+  - [Dashboard Grafana](#dashboard-grafana)
+    - [Variáveis dinâmicas](#variáveis-dinâmicas)
+    - [Cenários](#cenários)
+      - [Casa Inteligente / Domótica](#casa-inteligente--domótica)
+      - [Agricultura Inteligente](#agricultura-inteligente)
+      - [Ambiente Industrial](#ambiente-industrial)
+  - [Configuração Dinâmica](#configuração-dinâmica)
+  - [Painéis do Dashboard](#painéis-do-dashboard)
+    - [Configuração do cenário](#configuração-do-cenário)
+    - [Zonas do cenário](#zonas-do-cenário)
+    - [Sensores do cenário](#sensores-do-cenário)
+    - [Métricas do cenário](#métricas-do-cenário)
+    - [Histórico da Métrica](#histórico-da-métrica)
+    - [Limites](#limites)
+    - [Valor Atual](#valor-atual)
+    - [Estado da Métrica](#estado-da-métrica)
+  - [Estrutura do Projeto](#estrutura-do-projeto)
+  - [Dashboard Dinâmica e Cenários](#dashboard-dinâmica-e-cenários)
+  - [Serviços e Portas](#serviços-e-portas)
+  - [Estado Atual do Projeto](#estado-atual-do-projeto)
+    - [Funcionalidades implementadas](#funcionalidades-implementadas)
+  - [Semana 15 — Generalização do Dashboard](#semana-15--generalização-do-dashboard)
+    - [Funcionalidades desenvolvidas](#funcionalidades-desenvolvidas)
+  - [Semana 16 — Análise Avançada com Python](#semana-16--análise-avançada-com-python)
+    - [Arquitetura da análise](#arquitetura-da-análise)
+  - [Requisitos](#requisitos)
+  - [Instalação](#instalação)
+    - [1. Clonar o repositório](#1-clonar-o-repositório)
+    - [2. Entrar na pasta do projeto](#2-entrar-na-pasta-do-projeto)
+    - [3. Construir e iniciar os serviços](#3-construir-e-iniciar-os-serviços)
+    - [4. Confirmar o estado dos contentores](#4-confirmar-o-estado-dos-contentores)
+  - [Aceder aos Serviços](#aceder-aos-serviços)
+  - [Parar o Projeto](#parar-o-projeto)
+  - [Semana 17 — Consolidação e Estabilização](#semana-17--consolidação-e-estabilização)
+    - [Integração da Camada Inteligente](#integração-da-camada-inteligente)
+    - [Ativação e desativação de gráficos](#ativação-e-desativação-de-gráficos)
+    - [Zonas](#zonas)
+    - [Sensores e métricas](#sensores-e-métricas-1)
+    - [Limites](#limites-1)
+    - [Procedimento básico de configuração](#procedimento-básico-de-configuração)
+    - [Demonstração da configuração](#demonstração-da-configuração)
+      - [1. Verificar o cenário ativo](#1-verificar-o-cenário-ativo)
+      - [2. Alterar o cenário ativo](#2-alterar-o-cenário-ativo)
+      - [3. Iniciar ou atualizar o ambiente](#3-iniciar-ou-atualizar-o-ambiente)
+      - [4. Confirmar a configuração carregada](#4-confirmar-a-configuração-carregada)
+      - [5. Verificar o dashboard](#5-verificar-o-dashboard)
+      - [Demonstração da ativação e desativação de gráficos](#demonstração-da-ativação-e-desativação-de-gráficos)
+      - [Demonstração da alteração dos limites](#demonstração-da-alteração-dos-limites)
 # Dashboard Inteligente IoT
 
 ## Descrição
@@ -70,7 +125,7 @@ Paralelamente, existe integração com o FIWARE Orion Context Broker, utilizando
 
 ---
 
-# Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 | Tecnologia | Função |
 |------------|--------|
@@ -91,7 +146,7 @@ Paralelamente, existe integração com o FIWARE Orion Context Broker, utilizando
 
 ---
 
-# Sensores e Métricas
+## Sensores e Métricas
 
 O sistema encontra-se preparado para trabalhar com diferentes tipos de dados IoT.
 
@@ -110,7 +165,7 @@ Os sensores são atualmente simulados através do Node-RED, mas a arquitetura pe
 
 ---
 
-# Processamento e Análise no Node-RED
+## Processamento e Análise no Node-RED
 
 O Node-RED não é utilizado apenas para geração de valores simulados.
 
@@ -140,13 +195,13 @@ Desta forma, a plataforma evolui de uma simples visualização de sensores para 
 
 ---
 
-# Dashboard Grafana
+## Dashboard Grafana
 
 O Grafana constitui atualmente a principal interface de monitorização do projeto.
 
 O dashboard foi desenvolvido para se adaptar dinamicamente às escolhas realizadas pelo utilizador.
 
-## Variáveis dinâmicas
+### Variáveis dinâmicas
 
 Atualmente encontram-se disponíveis variáveis para:
 
@@ -161,11 +216,11 @@ Estas variáveis permitem modificar dinamicamente os dados apresentados no dashb
 
 ---
 
-## Cenários
+### Cenários
 
 Foram configurados três cenários principais para demonstrar a generalização da plataforma:
 
-### Casa Inteligente / Domótica
+#### Casa Inteligente / Domótica
 
 Exemplo de monitorização de:
 
@@ -174,7 +229,7 @@ Exemplo de monitorização de:
 - luminosidade;
 - sensores associados às diferentes zonas da habitação.
 
-### Agricultura Inteligente
+#### Agricultura Inteligente
 
 Exemplo de monitorização de uma estufa através de:
 
@@ -183,7 +238,7 @@ Exemplo de monitorização de uma estufa através de:
 - luminosidade;
 - sensores associados ao ambiente agrícola.
 
-### Ambiente Industrial
+#### Ambiente Industrial
 
 Exemplo de monitorização ambiental numa instalação industrial através de:
 
@@ -203,7 +258,7 @@ Cada cenário pode possuir diferentes:
 
 ---
 
-# Configuração Dinâmica
+## Configuração Dinâmica
 
 Uma das principais funcionalidades implementadas é a generalização do dashboard.
 
@@ -229,7 +284,7 @@ Isto permite reutilizar o mesmo dashboard para diferentes contextos IoT sem ser 
 
 ---
 
-# Painéis do Dashboard
+## Painéis do Dashboard
 
 O dashboard Grafana inclui atualmente painéis para:
 
@@ -295,7 +350,7 @@ O estado é também representado visualmente através de cores no Grafana.
 
 ---
 
-# Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
 Dashboard-Inteligente
@@ -320,7 +375,7 @@ Dashboard-Inteligente
 
 ---
 
-# Dashboard Dinâmica e Cenários
+## Dashboard Dinâmica e Cenários
 
 A dashboard Grafana foi generalizada para permitir a reutilização da mesma interface em diferentes contextos de aplicação.
 
@@ -362,7 +417,7 @@ A monitorização de movimento permanece implementada no sistema, mas encontra-s
 
 ---
 
-# Serviços e Portas
+## Serviços e Portas
 
 A configuração atual utiliza os seguintes serviços:
 
@@ -381,9 +436,9 @@ A configuração atual utiliza os seguintes serviços:
 
 ---
 
-# Estado Atual do Projeto
+## Estado Atual do Projeto
 
-## Funcionalidades implementadas
+### Funcionalidades implementadas
 
 Foram implementados:
 
@@ -430,13 +485,13 @@ A funcionalidade de movimento permanece implementada no sistema, mas foi tempora
 
 ---
 
-# Semana 15 — Generalização do Dashboard
+## Semana 15 — Generalização do Dashboard
 
 Durante a Semana 15 foi realizada uma evolução significativa do dashboard Grafana, com foco na generalização da plataforma.
 
 O objetivo foi deixar de ter uma interface dependente de um único caso de utilização e permitir que o mesmo dashboard possa representar diferentes cenários IoT.
 
-## Funcionalidades desenvolvidas
+### Funcionalidades desenvolvidas
 
 Foram implementados:
 
@@ -487,7 +542,7 @@ estado
 
 A funcionalidade de movimento permanece implementada no sistema, mas encontra-se temporariamente fora da visualização principal da dashboard.
 
-# Semana 16 — Análise Avançada com Python
+## Semana 16 — Análise Avançada com Python
 
 Durante a Semana 16 foi desenvolvida a componente de análise avançada de dados do sistema, complementando a análise baseada em regras já existente no Node-RED.
 
@@ -495,7 +550,7 @@ Para esta componente foi criado um serviço independente denominado **Python Ana
 
 O serviço obtém os dados históricos armazenados no InfluxDB e disponibiliza os resultados das análises através de uma API REST, posteriormente utilizada pelo Grafana para visualização.
 
-## Arquitetura da análise
+### Arquitetura da análise
 
 A divisão de responsabilidades ficou definida da seguinte forma:
 
@@ -512,9 +567,11 @@ Python Analytics
         ↓
       Grafana
 
+```
+
 ---
 
-# Requisitos
+## Requisitos
 
 Para executar o projeto é necessário:
 
@@ -535,27 +592,27 @@ Opcionalmente, para desenvolvimento:
 
 ---
 
-# Instalação
+## Instalação
 
-## 1. Clonar o repositório
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/BernagAldius/Dashboard-Inteligente.git
 ```
 
-## 2. Entrar na pasta do projeto
+### 2. Entrar na pasta do projeto
 
 ```bash
 cd Dashboard-Inteligente
 ```
 
-## 3. Construir e iniciar os serviços
+### 3. Construir e iniciar os serviços
 
 ```bash
 docker compose up -d --build
 ```
 
-## 4. Confirmar o estado dos contentores
+### 4. Confirmar o estado dos contentores
 
 ```bash
 docker compose ps
@@ -565,7 +622,7 @@ Todos os principais serviços deverão aparecer com estado `Up`.
 
 ---
 
-# Aceder aos Serviços
+## Aceder aos Serviços
 
 Depois de iniciar os contentores:
 
@@ -587,7 +644,7 @@ curl http://localhost:1026/version
 
 ---
 
-# Parar o Projeto
+## Parar o Projeto
 
 Para parar os serviços:
 
@@ -609,11 +666,11 @@ docker compose up -d --build
 
 ---
 
-# Semana 17 — Consolidação e Estabilização
+## Semana 17 — Consolidação e Estabilização
 
 Durante a Semana 17 foi realizada a consolidação da camada inteligente do sistema, a validação da integração entre os diferentes serviços e a estabilização do ambiente Docker.
 
-## Integração da Camada Inteligente
+### Integração da Camada Inteligente
 
 Foi validado o fluxo completo de dados entre os principais componentes do sistema:
 
@@ -632,11 +689,11 @@ Python Analytics
         ↓
      Grafana
 
-# Configuração do Dashboard
+## Configuração do Dashboard
 
 O sistema permite adaptar o dashboard a diferentes cenários através de ficheiros JSON localizados na pasta `config/`, sem necessidade de alterar o código da aplicação.
 
-## Seleção do cenário ativo
+### Seleção do cenário ativo
 
 O ficheiro `config/active-config.json` define o cenário ativo por defeito.
 
@@ -664,7 +721,7 @@ config/
 └── agricultura.json
 ```
 
-## Ativação e desativação de gráficos
+### Ativação e desativação de gráficos
 
 Cada ficheiro de cenário contém a secção `dashboard.charts`, que permite definir quais as métricas apresentadas no dashboard.
 
@@ -687,7 +744,7 @@ O valor `false` oculta esses gráficos.
 
 Desta forma, o dashboard pode ser adaptado às necessidades de cada cenário através do ficheiro de configuração, sem necessidade de modificar os painéis ou o código da aplicação.
 
-## Zonas
+### Zonas
 
 A propriedade `zones` permite organizar os sensores por zonas do cenário.
 
@@ -709,7 +766,7 @@ Por exemplo:
 - Domótica: Sala e Entrada
 - Agricultura: Estufa e Zona de Acesso
 
-## Sensores e métricas
+### Sensores e métricas
 
 Cada zona pode conter um ou mais sensores através da propriedade `sensors`.
 
@@ -736,7 +793,7 @@ Exemplo:
 }
 ```
 
-## Limites
+### Limites
 
 Os limites configurados em `alerts.min` e `alerts.max` são utilizados pelo sistema para avaliar o estado das métricas.
 
@@ -753,7 +810,7 @@ Neste exemplo, a temperatura possui um intervalo configurado entre `10 °C` e `3
 
 Os limites podem variar entre cenários e são utilizados dinamicamente pelo dashboard e pela camada de análise baseada em regras.
 
-## Procedimento básico de configuração
+### Procedimento básico de configuração
 
 Para adaptar o sistema:
 
@@ -775,11 +832,11 @@ docker compose up -d
 
 > **Nota:** O ficheiro `active-config.json` define o cenário ativo utilizado pelo sistema e pela camada de processamento. O Grafana mantém um seletor de cenário independente, permitindo ao utilizador consultar manualmente qualquer um dos cenários disponíveis. Por esse motivo, após alterar o cenário ativo, deve ser selecionado no Grafana o cenário correspondente quando se pretende visualizar a mesma configuração.
 
-## Demonstração da configuração
+### Demonstração da configuração
 
 A seguinte sequência pode ser utilizada para demonstrar a adaptação do sistema através dos ficheiros de configuração.
 
-### 1. Verificar o cenário ativo
+#### 1. Verificar o cenário ativo
 
 Antes de iniciar a demonstração, verificar qual o cenário atualmente definido em `config/active-config.json`:
 
@@ -795,7 +852,7 @@ O ficheiro deverá indicar um dos cenários disponíveis:
 
 O cenário apresentado corresponde à configuração atualmente selecionada pelo sistema.
 
-### 2. Alterar o cenário ativo
+#### 2. Alterar o cenário ativo
 
 Para demonstrar a configuração dinâmica do sistema, selecionar um cenário diferente do atualmente definido.
 
@@ -813,7 +870,7 @@ Se `agricultura` já for o cenário ativo, pode ser utilizado `domotica` ou `ind
 
 Guardar o ficheiro antes de iniciar ou atualizar o ambiente.
 
-### 3. Iniciar ou atualizar o ambiente
+#### 3. Iniciar ou atualizar o ambiente
 
 Executar:
 
@@ -823,7 +880,7 @@ docker compose up -d
 
 Este comando inicia os serviços necessários. Caso os contentores já se encontrem em execução, o Docker Compose mantém os serviços ativos, permitindo que a configuração guardada seja utilizada pelo sistema.
 
-### 4. Confirmar a configuração carregada
+#### 4. Confirmar a configuração carregada
 
 Executar:
 
@@ -835,7 +892,7 @@ O comando apresenta a identificação (`id`), o nome (`name`) e a descrição (`
 
 Confirmar que o cenário apresentado corresponde ao valor definido anteriormente em `config/active-config.json`.
 
-### 5. Verificar o dashboard
+#### 5. Verificar o dashboard
 
 Aceder ao Grafana em:
 
@@ -856,7 +913,7 @@ Confirmar que o dashboard apresenta corretamente:
 
 O seletor de cenário do Grafana é independente do cenário ativo do sistema, permitindo consultar manualmente qualquer um dos cenários disponíveis.
 
-### 6. Demonstrar a ativação e desativação de gráficos
+#### Demonstração da ativação e desativação de gráficos
 
 Abrir o ficheiro de configuração correspondente ao cenário selecionado:
 
@@ -915,7 +972,7 @@ A área de gráficos correspondente deverá voltar a ser apresentada.
 
 Este procedimento permite adaptar a interface às necessidades de cada cenário através dos ficheiros de configuração, sem modificar o código da aplicação ou os painéis do Grafana.
 
-### 7. Demonstrar a alteração dos limites
+#### Demonstração da alteração dos limites
 
 Os limites de cada métrica podem ser alterados através das propriedades `alerts.min` e `alerts.max` do respetivo ficheiro de cenário.
 

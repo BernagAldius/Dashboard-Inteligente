@@ -4,7 +4,6 @@
     "name": "Casa Inteligente",
     "description": "Monitorização e gestão de uma habitação inteligente"
   },
-
   "dashboard": {
     "charts": {
       "temperatura": true,
@@ -13,7 +12,6 @@
       "movimento": false
     }
   },
-
   "zones": [
     {
       "id": "sala",
@@ -29,8 +27,8 @@
               "label": "Temperatura",
               "unit": "°C",
               "alerts": {
-                "min": 15,
-                "max": 28
+                "min": 15.0,
+                "max": 28.0
               }
             },
             {
@@ -38,13 +36,12 @@
               "label": "Humidade",
               "unit": "%",
               "alerts": {
-                "min": 35,
-                "max": 70
+                "min": 35.0,
+                "max": 70.0
               }
             }
           ]
         },
-
         {
           "id": "sensor_002",
           "name": "Sensor de Luminosidade da Sala",
@@ -55,15 +52,14 @@
               "label": "Luminosidade",
               "unit": "lux",
               "alerts": {
-                "min": 100,
-                "max": 700
+                "min": 100.0,
+                "max": 700.0
               }
             }
           ]
         }
       ]
     },
-
     {
       "id": "entrada",
       "name": "Entrada",

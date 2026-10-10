@@ -1,0 +1,19 @@
+# CONFIGURAÇÃO DO DASHBOARD INTELIGENTE
+# Altere apenas os valores depois do sinal =
+
+# Cenários disponíveis: domotica, industrial, agricultura
+cenario=industrial
+
+temperatura=true
+temperatura_min=10
+temperatura_max=30
+
+humidade=true
+humidade_min=35
+humidade_max=75
+
+luminosidade=true
+luminosidade_min=100
+luminosidade_max=800
+
+movimento=false
