@@ -5,6 +5,9 @@ services:
     container_name: influxdb
     ports:
       - "8086:8086"
+    env_file:
+      - path: ./.env.influxdb
+        required: false
     volumes:
       - influxdb-data:/var/lib/influxdb2
 

@@ -1,0 +1,2 @@
+# Scripts Bash devem utilizar terminacoes de linha Linux
+*.sh text eol=lf

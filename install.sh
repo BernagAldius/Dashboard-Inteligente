@@ -425,6 +425,22 @@ echo "[OK] Todos os ficheiros obrigatorios foram encontrados."
 # VALIDAR DOCKER COMPOSE
 # ============================================
 
+# Preparar configuracoes de ambiente
+echo ""
+echo "A preparar configuracoes de ambiente..."
+
+if [[ ! -f "config/preparar_ambiente.py" ]]; then
+    echo "[ERRO] O ficheiro config/preparar_ambiente.py nao foi encontrado."
+    exit 1
+fi
+
+if ! python3 config/preparar_ambiente.py; then
+    echo "[ERRO] Falha ao preparar configuracoes de ambiente."
+    exit 1
+fi
+
+echo "[OK] Preparacao do ambiente concluida."
+
 echo ""
 echo "A validar docker-compose.yml..."
 

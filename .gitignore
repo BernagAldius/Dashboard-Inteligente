@@ -6,6 +6,7 @@ node_modules
 .env.*
 backend/.env
 backend/.env.docker
+.env.influxdb
 
 # Build output
 dist
