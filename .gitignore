@@ -24,3 +24,10 @@ docker/backups/
 docker/mongodb-backup/
 
 config/*.json.bak
+
+# Ficheiros temporarios Python
+__pycache__/
+*.pyc
+
+# Copias de seguranca
+*.bak

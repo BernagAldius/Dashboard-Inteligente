@@ -571,7 +571,23 @@ if [[ "$RESPOSTA_ARRANQUE" =~ ^[Ss]$ ]]; then
     if [[ "${#SERVICOS_EM_FALTA[@]}" -eq 0 ]]; then
 
         echo "[OK] Todos os servicos estao em execucao."
-        
+
+        echo ""
+        echo "[INFO] A preparar os fluxos do Node-RED..."
+
+        if [[ "${DOCKER_CMD[0]}" == "sudo" ]]; then
+            COMANDO_IMPORTAR=(sudo python3 config/importar_flows.py)
+        else
+            COMANDO_IMPORTAR=(python3 config/importar_flows.py)
+        fi
+
+        if ! "${COMANDO_IMPORTAR[@]}"; then
+            echo "[ERRO] Nao foi possivel preparar os fluxos do Node-RED."
+            exit 1
+        fi
+
+        echo "[OK] Fluxos do Node-RED preparados."
+
         echo
         echo "[INFO] A importar dashboard do Grafana..."
 

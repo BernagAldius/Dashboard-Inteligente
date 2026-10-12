@@ -76,7 +76,9 @@
               "data_type": "boolean",
               "alerts": {
                 "high_activity": 7,
-                "persistent_activity": 9
+                "persistent_activity": 9,
+                "min": 0,
+                "max": 1
               }
             }
           ]

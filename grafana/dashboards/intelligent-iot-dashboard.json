@@ -683,7 +683,7 @@
                       "root_selector": "scenario",
                       "source": "url",
                       "type": "json",
-                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
                       "url_options": {
                         "data": "",
                         "method": "GET"
@@ -796,7 +796,7 @@
                       "root_selector": "zones",
                       "source": "url",
                       "type": "json",
-                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
                       "url_options": {
                         "data": "",
                         "method": "GET"
@@ -899,7 +899,7 @@
                       "root_selector": "zones.sensors",
                       "source": "url",
                       "type": "json",
-                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
                       "url_options": {
                         "data": "",
                         "method": "GET"
@@ -1002,7 +1002,7 @@
                       "root_selector": "zones.sensors.metrics",
                       "source": "url",
                       "type": "json",
-                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
                       "url_options": {
                         "data": "",
                         "method": "GET"
@@ -1298,7 +1298,7 @@
                       "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
                       "source": "url",
                       "type": "json",
-                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
                       "url_options": {
                         "data": "",
                         "method": "GET"
@@ -1377,7 +1377,7 @@
                     "group": "influxdb",
                     "kind": "DataQuery",
                     "spec": {
-                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      Valor: r._value,\r\n      Estado:\r\n        if r._value < ${min_threshold} then \"ABAIXO DO LIMITE\"\r\n        else if r._value > ${max_threshold} then \"ACIMA DO LIMITE\"\r\n        else \"NORMAL\"\r\n  }))"
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      Valor: r._value,\r\n      Estado:\r\n        if float(v: r._value) < float(v: ${min_threshold}) then \"ABAIXO DO LIMITE\"\r\n        else if float(v: r._value) > float(v: ${max_threshold}) then \"ACIMA DO LIMITE\"\r\n        else \"NORMAL\"\r\n  }))"
                     },
                     "version": "v0"
                   },
@@ -1455,7 +1455,7 @@
                     "group": "influxdb",
                     "kind": "DataQuery",
                     "spec": {
-                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      _time: r._time,\r\n      _value:\r\n        if r._value < ${min_threshold} then \"ABAIXO DO LIMITE\"\r\n        else if r._value > ${max_threshold} then \"ACIMA DO LIMITE\"\r\n        else \"NORMAL\"\r\n  }))"
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      _time: r._time,\r\n      _value:\r\n        if float(v: r._value) < float(v: ${min_threshold}) then \"ABAIXO DO LIMITE\"\r\n        else if float(v: r._value) > float(v: ${max_threshold}) then \"ACIMA DO LIMITE\"\r\n        else \"NORMAL\"\r\n  }))"
                     },
                     "version": "v0"
                   },
@@ -3560,7 +3560,7 @@
               "root_selector": "zones.sensors[id=\"${sensor}\"].metrics",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3621,7 +3621,7 @@
               "root_selector": "zones.sensors",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3677,7 +3677,7 @@
               "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3733,7 +3733,7 @@
               "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3789,7 +3789,7 @@
               "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3845,7 +3845,7 @@
               "root_selector": "dashboard.charts",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3902,7 +3902,7 @@
               "root_selector": "dashboard.charts",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3958,7 +3958,7 @@
               "root_selector": "dashboard.charts",
               "source": "url",
               "type": "json",
-              "url": "/dashboard-config?scenario=${scenario}",
+              "url": "http://backend:3000/dashboard-config?scenario=${scenario}",
               "url_options": {
                 "data": "",
                 "method": "GET"

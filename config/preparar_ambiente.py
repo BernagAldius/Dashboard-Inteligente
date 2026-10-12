@@ -25,6 +25,24 @@ def criar_ficheiro(caminho, conteudo):
     print(f"[OK] Configuracao criada: {caminho}")
     return True
 
+def preparar_grafana():
+    """Cria credenciais administrativas do Grafana, se ainda não existirem."""
+
+    if GRAFANA_ENV.exists():
+        print("[OK] Credenciais do Grafana existentes preservadas.")
+        return
+
+    password = secrets.token_urlsafe(32)
+
+    conteudo = (
+        "GF_SECURITY_ADMIN_USER=admin\n"
+        f"GF_SECURITY_ADMIN_PASSWORD={password}\n"
+    )
+
+    criar_ficheiro(GRAFANA_ENV, conteudo)
+
+    print("[OK] Credenciais administrativas do Grafana preparadas.")
+
 
 def main():
     preparar_grafana()
@@ -68,7 +86,7 @@ def main():
 
     backend_config = (
         "MQTT_URL=mqtt://mosquitto:1883\n"
-        "MQTT_TOPIC=sensors/ambiental/001\n"
+        "MQTT_TOPIC=sensors/+/+\n"
         "INFLUX_URL=http://influxdb:8086\n"
         f"INFLUX_TOKEN={token}\n"
         "INFLUX_ORG=ipp\n"
@@ -92,20 +110,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-def preparar_grafana():
-    """Cria credenciais administrativas do Grafana, se ainda não existirem."""
-
-    if GRAFANA_ENV.exists():
-        print("[OK] Credenciais do Grafana existentes preservadas.")
-        return
-
-    password = secrets.token_urlsafe(32)
-
-    conteudo = (
-        "GF_SECURITY_ADMIN_USER=admin\n"
-        f"GF_SECURITY_ADMIN_PASSWORD={password}\n"
-    )
-
-    criar_ficheiro(GRAFANA_ENV, conteudo)
-
-    print("[OK] Credenciais administrativas do Grafana preparadas.")
