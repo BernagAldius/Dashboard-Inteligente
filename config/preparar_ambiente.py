@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BACKEND_ENV = ROOT / "backend" / ".env.docker"
 ANALYTICS_ENV = ROOT / "analytics" / ".env.docker"
 INFLUX_ENV = ROOT / ".env.influxdb"
+GRAFANA_ENV = ROOT / "grafana" / ".env.grafana"
 
 
 def criar_ficheiro(caminho, conteudo):
@@ -26,6 +27,8 @@ def criar_ficheiro(caminho, conteudo):
 
 
 def main():
+    preparar_grafana()
+    
     print("\nA preparar configuracoes do Dashboard Inteligente...")
 
     # Não misturar credenciais novas com configurações antigas.
@@ -88,3 +91,21 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def preparar_grafana():
+    """Cria credenciais administrativas do Grafana, se ainda não existirem."""
+
+    if GRAFANA_ENV.exists():
+        print("[OK] Credenciais do Grafana existentes preservadas.")
+        return
+
+    password = secrets.token_urlsafe(32)
+
+    conteudo = (
+        "GF_SECURITY_ADMIN_USER=admin\n"
+        f"GF_SECURITY_ADMIN_PASSWORD={password}\n"
+    )
+
+    criar_ficheiro(GRAFANA_ENV, conteudo)
+
+    print("[OK] Credenciais administrativas do Grafana preparadas.")

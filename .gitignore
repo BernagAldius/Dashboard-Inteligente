@@ -6,6 +6,8 @@ node_modules
 .env.*
 backend/.env
 backend/.env.docker
+analytics/.env.docker
+grafana/.env.grafana
 .env.influxdb
 
 # Build output

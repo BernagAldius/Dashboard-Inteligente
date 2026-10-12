@@ -72,6 +72,7 @@ services:
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     env_file:
       - ./backend/.env.docker
+      - ./grafana/.env.grafana
     environment:
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_AUTH_ANONYMOUS_ENABLED=true

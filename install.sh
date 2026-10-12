@@ -571,6 +571,16 @@ if [[ "$RESPOSTA_ARRANQUE" =~ ^[Ss]$ ]]; then
     if [[ "${#SERVICOS_EM_FALTA[@]}" -eq 0 ]]; then
 
         echo "[OK] Todos os servicos estao em execucao."
+        
+        echo
+        echo "[INFO] A importar dashboard do Grafana..."
+
+        if ! python3 config/importar_dashboard.py; then
+            echo "[ERRO] Nao foi possivel importar a dashboard do Grafana."
+            exit 1
+        fi
+
+        echo "[OK] Dashboard do Grafana preparada."
         echo "[INFO] Servicos ativos: ${#SERVICOS_ATIVOS[@]} de ${#SERVICOS_ESPERADOS[@]}"
 
         echo ""
