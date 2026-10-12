@@ -59,7 +59,7 @@ def main():
         "DOCKER_INFLUXDB_INIT_USERNAME=dashboard_admin\n"
         f"DOCKER_INFLUXDB_INIT_PASSWORD={password}\n"
         "DOCKER_INFLUXDB_INIT_ORG=ipp\n"
-        "DOCKER_INFLUXDB_INIT_BUCKET=sensores\n"
+        "DOCKER_INFLUXDB_INIT_BUCKET=iot_data\n"
         f"DOCKER_INFLUXDB_INIT_ADMIN_TOKEN={token}\n"
     )
 
@@ -69,14 +69,14 @@ def main():
         "INFLUX_URL=http://influxdb:8086\n"
         f"INFLUX_TOKEN={token}\n"
         "INFLUX_ORG=ipp\n"
-        "INFLUX_BUCKET=sensores\n"
+        "INFLUX_BUCKET=iot_data\n"
     )
 
     analytics_config = (
         "INFLUX_URL=http://influxdb:8086\n"
         f"INFLUX_TOKEN={token}\n"
         "INFLUX_ORG=ipp\n"
-        "INFLUX_BUCKET=sensores\n"
+        "INFLUX_BUCKET=iot_data\n"
     )
 
     criar_ficheiro(INFLUX_ENV, influx_config)

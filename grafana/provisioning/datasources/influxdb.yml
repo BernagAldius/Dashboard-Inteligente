@@ -1,0 +1,23 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    uid: afra0bj7axla8d
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: ipp
+      defaultBucket: iot_data
+    secureJsonData:
+      token: $INFLUX_TOKEN
+  - name: Infinity-Configuracao
+    uid: eftlp2b7qhypse
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+  - name: Infinity-Analytics
+    uid: dfxo5beum0poga
+    type: yesoreyeram-infinity-datasource
+    access: proxy

@@ -1,0 +1,3980 @@
+{
+  "annotations": [
+    {
+      "kind": "AnnotationQuery",
+      "spec": {
+        "builtIn": true,
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "query": {
+          "datasource": {
+            "name": "-- Grafana --"
+          },
+          "group": "grafana",
+          "kind": "DataQuery",
+          "spec": {},
+          "version": "v0"
+        }
+      }
+    }
+  ],
+  "cursorSync": "Off",
+  "editable": true,
+  "elements": {
+    "panel-1": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -6h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperatura\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 1,
+        "links": [],
+        "title": "Temperatura Atual",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
+                "unit": "celsius"
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-10": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_003\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"estado\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"normal\" then 0\r\n        else if r._value == \"aviso\" then 1\r\n        else if r._value == \"alerta\" then 2\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 10,
+        "links": [],
+        "title": "Estado Movimento",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "light-green",
+                        "index": 0,
+                        "text": "Normal"
+                      },
+                      "1": {
+                        "color": "semi-dark-yellow",
+                        "index": 1,
+                        "text": "Aviso"
+                      },
+                      "2": {
+                        "color": "dark-red",
+                        "index": 2,
+                        "text": "Alerta"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-11": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_001\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"tendencia_temperatura\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"subida rápida\" then 4\r\n        else if r._value == \"subida gradual\" then 3\r\n        else if r._value == \"estável\" then 2\r\n        else if r._value == \"descida gradual\" then 1\r\n        else if r._value == \"descida rápida\" then 0\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 11,
+        "links": [],
+        "title": "Tendência Temperatura",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "dark-blue",
+                        "index": 4,
+                        "text": "Descida rápida"
+                      },
+                      "1": {
+                        "color": "light-blue",
+                        "index": 3,
+                        "text": "Descida Gradual"
+                      },
+                      "2": {
+                        "color": "green",
+                        "index": 2,
+                        "text": "Estável"
+                      },
+                      "3": {
+                        "color": "orange",
+                        "index": 1,
+                        "text": "Subida Gradual"
+                      },
+                      "4": {
+                        "color": "dark-red",
+                        "index": 0,
+                        "text": "Subida Rápida"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-12": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_001\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"tendencia_humidade\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"subida rápida\" then 4\r\n        else if r._value == \"subida gradual\" then 3\r\n        else if r._value == \"estável\" then 2\r\n        else if r._value == \"descida gradual\" then 1\r\n        else if r._value == \"descida rápida\" then 0\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 12,
+        "links": [],
+        "title": "Tendência Humidade",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "dark-blue",
+                        "index": 4,
+                        "text": "Descida rápida"
+                      },
+                      "1": {
+                        "color": "light-blue",
+                        "index": 3,
+                        "text": "Descida Gradual"
+                      },
+                      "2": {
+                        "color": "green",
+                        "index": 2,
+                        "text": "Estável"
+                      },
+                      "3": {
+                        "color": "orange",
+                        "index": 1,
+                        "text": "Subida Gradual"
+                      },
+                      "4": {
+                        "color": "dark-red",
+                        "index": 0,
+                        "text": "Subida Rápida"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-13": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_002\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"tendencia_luminosidade\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"subida rápida\" then 4\r\n        else if r._value == \"subida gradual\" then 3\r\n        else if r._value == \"estável\" then 2\r\n        else if r._value == \"descida gradual\" then 1\r\n        else if r._value == \"descida rápida\" then 0\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 13,
+        "links": [],
+        "title": "Tendência Luminosidade",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "dark-blue",
+                        "index": 4,
+                        "text": "Descida rápida"
+                      },
+                      "1": {
+                        "color": "light-blue",
+                        "index": 3,
+                        "text": "Descida Gradual"
+                      },
+                      "2": {
+                        "color": "green",
+                        "index": 2,
+                        "text": "Estável"
+                      },
+                      "3": {
+                        "color": "orange",
+                        "index": 1,
+                        "text": "Subida Gradual"
+                      },
+                      "4": {
+                        "color": "dark-red",
+                        "index": 0,
+                        "text": "Subida Rápida"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-14": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_003\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"atividade_movimento\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"sem movimento\" then 0\r\n        else if r._value == \"movimento detetado\" then 1\r\n        else if r._value == \"atividade elevada\" then 2\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 14,
+        "links": [],
+        "title": "Atividade Movimento",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "light-yellow",
+                        "index": 0,
+                        "text": "Sem Movimento"
+                      },
+                      "1": {
+                        "color": "light-orange",
+                        "index": 1,
+                        "text": "Movimento Detetado"
+                      },
+                      "2": {
+                        "color": "light-red",
+                        "index": 2,
+                        "text": "Muito Movimento"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-15": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "eftlp2b7qhypse"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "name",
+                          "text": "Cenário",
+                          "type": "string"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "scenario",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": [
+              {
+                "group": "reduce",
+                "kind": "Transformation",
+                "spec": {
+                  "options": {
+                    "includeTimeField": false,
+                    "mode": "reduceFields",
+                    "reducers": [
+                      "lastNotNull"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "description": "",
+        "id": 15,
+        "links": [],
+        "title": "Teste Configuração",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "/^Cenário$/",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-16": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "eftlp2b7qhypse"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "name",
+                          "text": "Zona",
+                          "type": "string"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "zones",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 16,
+        "links": [],
+        "title": "Zonas do Cenário",
+        "vizConfig": {
+          "group": "table",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "footer": {
+                    "reducers": []
+                  },
+                  "inspect": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "cellHeight": "sm",
+              "showHeader": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-17": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "eftlp2b7qhypse"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "id",
+                          "text": "Sensor Id",
+                          "type": "string"
+                        },
+                        {
+                          "selector": "name",
+                          "text": "Sensor",
+                          "type": "string"
+                        },
+                        {
+                          "selector": "type",
+                          "text": "Tipo",
+                          "type": "string"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "zones.sensors",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 17,
+        "links": [],
+        "title": "Sensores do Cenário",
+        "vizConfig": {
+          "group": "table",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "footer": {
+                    "reducers": []
+                  },
+                  "inspect": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "cellHeight": "sm",
+              "showHeader": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-18": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "eftlp2b7qhypse"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "field",
+                          "text": "Métrica",
+                          "type": "string"
+                        },
+                        {
+                          "selector": "label",
+                          "text": "Nome",
+                          "type": "string"
+                        },
+                        {
+                          "selector": "unit",
+                          "text": "Unidade",
+                          "type": "string"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "zones.sensors.metrics",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 18,
+        "links": [],
+        "title": "Métricas do Cenário",
+        "vizConfig": {
+          "group": "table",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "footer": {
+                    "reducers": []
+                  },
+                  "inspect": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "cellHeight": "sm",
+              "showHeader": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-19": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 19,
+        "links": [],
+        "title": "Histórico — ${metric} (${unit})",
+        "vizConfig": {
+          "group": "timeseries",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "showValues": false,
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "annotations": {
+                "clustering": -1,
+                "multiLane": false
+              },
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-2": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -6h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidade\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 2,
+        "links": [],
+        "title": "Humidade Atual",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-20": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "eftlp2b7qhypse"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "alerts.min",
+                          "text": "Limite mínimo",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "alerts.max",
+                          "text": "Limite máximo",
+                          "type": "number"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/dashboard-config?scenario=${scenario}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 20,
+        "links": [],
+        "title": "Limites",
+        "vizConfig": {
+          "group": "table",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "footer": {
+                    "reducers": []
+                  },
+                  "inspect": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "cellHeight": "sm",
+              "showHeader": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-21": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      Valor: r._value,\r\n      Estado:\r\n        if r._value < ${min_threshold} then \"ABAIXO DO LIMITE\"\r\n        else if r._value > ${max_threshold} then \"ACIMA DO LIMITE\"\r\n        else \"NORMAL\"\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 21,
+        "links": [],
+        "title": "Valor Atual — ${metric} (${unit})",
+        "vizConfig": {
+          "group": "table",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "footer": {
+                    "reducers": []
+                  },
+                  "inspect": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "cellHeight": "sm",
+              "showHeader": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-22": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"${sensor}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"${metric}\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      _time: r._time,\r\n      _value:\r\n        if r._value < ${min_threshold} then \"ABAIXO DO LIMITE\"\r\n        else if r._value > ${max_threshold} then \"ACIMA DO LIMITE\"\r\n        else \"NORMAL\"\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 22,
+        "links": [],
+        "title": "Estado da Métrica",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "ABAIXO DO LIMITE": {
+                        "color": "light-red",
+                        "index": 1,
+                        "text": "Abaixo do Limite"
+                      },
+                      "ACIMA DO LIMITE": {
+                        "color": "semi-dark-red",
+                        "index": 2,
+                        "text": "Acima ao Limite"
+                      },
+                      "NORMAL": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "Normal"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "/^Value$/",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-23": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "dfxo5beum0poga"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "time",
+                          "text": "time",
+                          "type": "timestamp"
+                        },
+                        {
+                          "selector": "value",
+                          "text": "value",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "z_score",
+                          "text": "z_score",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "anomalia",
+                          "text": "anomalia",
+                          "type": "boolean"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "data",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/zscore/${metric}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": [
+              {
+                "group": "filterFieldsByName",
+                "kind": "Transformation",
+                "spec": {
+                  "options": {
+                    "include": {
+                      "names": [
+                        "time",
+                        "z_score"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "description": "",
+        "id": 23,
+        "links": [],
+        "title": "Análise Z-score – ${metric}",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "semi-dark-red",
+                      "value": 0
+                    },
+                    {
+                      "color": "semi-dark-green",
+                      "value": -2
+                    },
+                    {
+                      "color": "red",
+                      "value": 2
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "text": {
+                "valueSize": 60
+              },
+              "textMode": "value",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-24": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "dfxo5beum0poga"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "time",
+                          "text": "time",
+                          "type": "timestamp"
+                        },
+                        {
+                          "selector": "value",
+                          "text": "value",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "score",
+                          "text": "score",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "anomalia",
+                          "text": "anomalia",
+                          "type": "boolean"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "data",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/isolation-forest/${metric}",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": [
+              {
+                "group": "filterFieldsByName",
+                "kind": "Transformation",
+                "spec": {
+                  "options": {
+                    "include": {
+                      "names": [
+                        "score",
+                        "time"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "description": "",
+        "id": 24,
+        "links": [],
+        "title": "Isolation Forest – ${metric}",
+        "vizConfig": {
+          "group": "timeseries",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "showValues": false,
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "line"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "annotations": {
+                "clustering": -1,
+                "multiLane": false
+              },
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-25": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "dfxo5beum0poga"
+                    },
+                    "group": "yesoreyeram-infinity-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "columns": [
+                        {
+                          "selector": "step",
+                          "text": "step",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "predicted_value",
+                          "text": "predicted_value",
+                          "type": "number"
+                        },
+                        {
+                          "selector": "time",
+                          "text": "time",
+                          "type": "timestamp"
+                        }
+                      ],
+                      "filters": [],
+                      "format": "table",
+                      "global_query_id": "",
+                      "parser": "backend",
+                      "root_selector": "forecast",
+                      "source": "url",
+                      "type": "json",
+                      "url": "/forecast",
+                      "url_options": {
+                        "data": "",
+                        "method": "GET"
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {
+              "timeShift": "0s"
+            },
+            "transformations": [
+              {
+                "group": "filterFieldsByName",
+                "kind": "Transformation",
+                "spec": {
+                  "options": {
+                    "include": {
+                      "names": [
+                        "predicted_value",
+                        "time"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "description": "",
+        "id": 25,
+        "links": [],
+        "title": "Previsão de Temperatura — Regressão Linear",
+        "vizConfig": {
+          "group": "timeseries",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "showValues": false,
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "annotations": {
+                "clustering": -1,
+                "multiLane": false
+              },
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-3": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperatura\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              },
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperatura_media_movel\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "B"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 3,
+        "links": [],
+        "title": "Temperatura vs Média Móvel",
+        "vizConfig": {
+          "group": "timeseries",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 49,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "smooth",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "showValues": false,
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
+                "unit": "celsius"
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "temperatura",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "orange",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "temperatura_media_movel",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "annotations": {
+                "clustering": -1,
+                "multiLane": false
+              },
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-4": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidade\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              },
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"humidade_media_movel\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "B"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 4,
+        "links": [],
+        "title": "Humidade vs Média Móvel",
+        "vizConfig": {
+          "group": "timeseries",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 25,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "showValues": false,
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "humidade_media_movel",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "purple",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "annotations": {
+                "clustering": -1,
+                "multiLane": false
+              },
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-5": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"anomalia\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 5,
+        "links": [],
+        "title": "Anomalias",
+        "vizConfig": {
+          "group": "state-timeline",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "continuous-GrYlRd"
+                },
+                "custom": {
+                  "axisPlacement": "auto",
+                  "fillOpacity": 70,
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineWidth": 0,
+                  "spanNulls": false
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "anomalia {sensor_id=\"sensor_001\", tipo=\"ambiental\"}",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Ambiental"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "anomalia {sensor_id=\"sensor_002\", tipo=\"luminosidade\"}",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Luminosidade"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "anomalia {sensor_id=\"sensor_003\", tipo=\"movimento\"}",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "movimento"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "alignValue": "left",
+              "annotations": {
+                "clustering": -1,
+                "multiLane": false
+              },
+              "legend": {
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "mergeValues": true,
+              "rowHeight": 0.9,
+              "showValue": "never",
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-6": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"luminosidade\")"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 6,
+        "links": [],
+        "title": "Luminosidade Atual",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
+                "unit": "lux"
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-7": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_003\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"movimento\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value: if r._value then 1 else 0\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 7,
+        "links": [],
+        "title": "Movimento Atual",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "semi-dark-yellow",
+                        "index": 1,
+                        "text": "Sem movimento"
+                      },
+                      "1": {
+                        "color": "semi-dark-red",
+                        "index": 0,
+                        "text": "Movimento Detetado"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-8": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_001\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"estado\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"normal\" then 0\r\n        else if r._value == \"aviso\" then 1\r\n        else if r._value == \"alerta\" then 2\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 8,
+        "links": [],
+        "title": "Estado Ambiental",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "light-green",
+                        "index": 0,
+                        "text": "Normal"
+                      },
+                      "1": {
+                        "color": "semi-dark-yellow",
+                        "index": 1,
+                        "text": "Aviso"
+                      },
+                      "2": {
+                        "color": "dark-red",
+                        "index": 2,
+                        "text": "Alerta"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    },
+    "panel-9": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "afra0bj7axla8d"
+                    },
+                    "group": "influxdb",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "query": "from(bucket: \"iot_data\")\r\n  |> range(start: -24h)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_readings\")\r\n  |> filter(fn: (r) => r[\"sensor_id\"] == \"sensor_002\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"estado\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      _value:\r\n        if r._value == \"normal\" then 0\r\n        else if r._value == \"aviso\" then 1\r\n        else if r._value == \"alerta\" then 2\r\n        else -1\r\n  }))"
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 9,
+        "links": [],
+        "title": "Estado Luminosidade",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "light-green",
+                        "index": 0,
+                        "text": "Normal"
+                      },
+                      "1": {
+                        "color": "semi-dark-yellow",
+                        "index": 1,
+                        "text": "Aviso"
+                      },
+                      "2": {
+                        "color": "dark-red",
+                        "index": 2,
+                        "text": "Alerta"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "wideLayout": true
+            }
+          },
+          "version": "13.0.2"
+        }
+      }
+    }
+  },
+  "layout": {
+    "kind": "RowsLayout",
+    "spec": {
+      "rows": [
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": false,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "temperatura",
+                      "variable": "metric"
+                    }
+                  },
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "true",
+                      "variable": "show_temperature"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-1"
+                      },
+                      "height": 6,
+                      "width": 6,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-8"
+                      },
+                      "height": 6,
+                      "width": 6,
+                      "x": 6,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-3"
+                      },
+                      "height": 11,
+                      "width": 12,
+                      "x": 12,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-11"
+                      },
+                      "height": 5,
+                      "width": 12,
+                      "x": 0,
+                      "y": 6
+                    }
+                  }
+                ]
+              }
+            },
+            "title": "Temperatura"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "humidade",
+                      "variable": "metric"
+                    }
+                  },
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "true",
+                      "variable": "show_humidity"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-2"
+                      },
+                      "height": 5,
+                      "width": 11,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-4"
+                      },
+                      "height": 10,
+                      "width": 13,
+                      "x": 11,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-12"
+                      },
+                      "height": 5,
+                      "width": 11,
+                      "x": 0,
+                      "y": 5
+                    }
+                  }
+                ]
+              }
+            },
+            "title": "Humidade"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": false,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "luminosidade",
+                      "variable": "metric"
+                    }
+                  },
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "true",
+                      "variable": "show_luminosity"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-6"
+                      },
+                      "height": 7,
+                      "width": 8,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-9"
+                      },
+                      "height": 7,
+                      "width": 7,
+                      "x": 8,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-13"
+                      },
+                      "height": 7,
+                      "width": 9,
+                      "x": 15,
+                      "y": 0
+                    }
+                  }
+                ]
+              }
+            },
+            "title": "Luminosidade"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-22"
+                      },
+                      "height": 5,
+                      "width": 6,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-15"
+                      },
+                      "height": 5,
+                      "width": 6,
+                      "x": 6,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-18"
+                      },
+                      "height": 9,
+                      "width": 12,
+                      "x": 12,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-20"
+                      },
+                      "height": 4,
+                      "width": 12,
+                      "x": 0,
+                      "y": 5
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-17"
+                      },
+                      "height": 8,
+                      "width": 12,
+                      "x": 0,
+                      "y": 9
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-16"
+                      },
+                      "height": 8,
+                      "width": 12,
+                      "x": 12,
+                      "y": 9
+                    }
+                  }
+                ]
+              }
+            },
+            "title": "Informação Geral"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "temperatura",
+                      "variable": "metric"
+                    }
+                  },
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "humidade",
+                      "variable": "metric"
+                    }
+                  },
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "luminosidade",
+                      "variable": "metric"
+                    }
+                  },
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "movimento",
+                      "variable": "metric"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-7"
+                      },
+                      "height": 7,
+                      "width": 6,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-14"
+                      },
+                      "height": 7,
+                      "width": 6,
+                      "x": 6,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-19"
+                      },
+                      "height": 21,
+                      "width": 12,
+                      "x": 12,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-10"
+                      },
+                      "height": 6,
+                      "width": 12,
+                      "x": 0,
+                      "y": 7
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-21"
+                      },
+                      "height": 8,
+                      "width": 12,
+                      "x": 0,
+                      "y": 13
+                    }
+                  }
+                ]
+              }
+            },
+            "title": "Movimento"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "agricultura",
+                      "variable": "scenario"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": []
+              }
+            },
+            "title": "Análise — Agricultura"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "industrial",
+                      "variable": "scenario"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": []
+              }
+            },
+            "title": "Análise - Industrial"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "conditionalRendering": {
+              "kind": "ConditionalRenderingGroup",
+              "spec": {
+                "condition": "and",
+                "items": [
+                  {
+                    "kind": "ConditionalRenderingVariable",
+                    "spec": {
+                      "operator": "equals",
+                      "value": "domotica",
+                      "variable": "scenario"
+                    }
+                  }
+                ],
+                "visibility": "show"
+              }
+            },
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": []
+              }
+            },
+            "title": "Análise - Domótica"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": true,
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-5"
+                      },
+                      "height": 9,
+                      "width": 24,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-23"
+                      },
+                      "height": 10,
+                      "width": 8,
+                      "x": 0,
+                      "y": 9
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-24"
+                      },
+                      "height": 10,
+                      "width": 8,
+                      "x": 8,
+                      "y": 9
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-25"
+                      },
+                      "height": 10,
+                      "width": 8,
+                      "x": 16,
+                      "y": 9
+                    }
+                  }
+                ]
+              }
+            },
+            "title": "Análise de Anomalias"
+          }
+        }
+      ]
+    }
+  },
+  "links": [],
+  "liveNow": false,
+  "preferences": {
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": []
+      }
+    }
+  },
+  "preload": false,
+  "tags": [],
+  "timeSettings": {
+    "autoRefresh": "10s",
+    "autoRefreshIntervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "fiscalYearStartMonth": 0,
+    "from": "now-30m",
+    "hideTimepicker": false,
+    "timezone": "browser",
+    "to": "now+1m"
+  },
+  "title": "Intelligent IoT Monitoring Dashboard",
+  "variables": [
+    {
+      "kind": "CustomVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "industrial",
+          "value": "industrial"
+        },
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Cenário",
+        "multi": false,
+        "name": "scenario",
+        "options": [],
+        "query": "industrial,domotica,agricultura",
+        "skipUrlSync": false,
+        "valuesFormat": "csv"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "Temperatura",
+          "value": "temperatura"
+        },
+        "definition": "",
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Métrica",
+        "multi": false,
+        "name": "metric",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "label",
+                  "text": "_text",
+                  "type": "string"
+                },
+                {
+                  "selector": "field",
+                  "text": "_value",
+                  "type": "string"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "zones.sensors[id=\"${sensor}\"].metrics",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "Sensor Ambiental",
+          "value": "sensor_001"
+        },
+        "definition": "",
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Sensor",
+        "multi": false,
+        "name": "sensor",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "name",
+                  "text": "__text",
+                  "type": "string"
+                },
+                {
+                  "selector": "id",
+                  "text": "__value",
+                  "type": "string"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "zones.sensors",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "10",
+          "value": "10"
+        },
+        "definition": "",
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Limite mínimo",
+        "multi": false,
+        "name": "min_threshold",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "alerts.min",
+                  "text": "__value",
+                  "type": "number"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "30",
+          "value": "30"
+        },
+        "definition": "",
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Limite máximo",
+        "multi": false,
+        "name": "max_threshold",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "alerts.max",
+                  "text": "__value",
+                  "type": "number"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "°C",
+          "value": "°C"
+        },
+        "definition": "",
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Unidade",
+        "multi": false,
+        "name": "unit",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "unit",
+                  "text": "__value",
+                  "type": "string"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "zones.sensors[id=\"${sensor}\"].metrics[field=\"${metric}\"]",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "true",
+          "value": "true"
+        },
+        "definition": "",
+        "description": "Controla a apresentação dos gráficos de temperatura através da configuração",
+        "hide": "hideVariable",
+        "includeAll": false,
+        "multi": false,
+        "name": "show_temperature",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "temperatura",
+                  "text": "temperatura",
+                  "type": "string"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "dashboard.charts",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "meta": {},
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "true",
+          "value": "true"
+        },
+        "definition": "",
+        "description": "Controla a apresentação dos gráficos de humidade através da configuração",
+        "hide": "hideVariable",
+        "includeAll": false,
+        "multi": false,
+        "name": "show_humidity",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "humidade",
+                  "text": "humidade",
+                  "type": "string"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "dashboard.charts",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "true",
+          "value": "true"
+        },
+        "definition": "",
+        "description": "Controla a apresentação dos gráficos de luminosidade através da configuração",
+        "hide": "hideVariable",
+        "includeAll": false,
+        "multi": false,
+        "name": "show_luminosity",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "eftlp2b7qhypse"
+          },
+          "group": "yesoreyeram-infinity-datasource",
+          "kind": "DataQuery",
+          "spec": {
+            "infinityQuery": {
+              "columns": [
+                {
+                  "selector": "luminosidade",
+                  "text": "luminosidade",
+                  "type": "string"
+                }
+              ],
+              "data": "values\nfoo\nbar\nbaz",
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "",
+              "root_selector": "dashboard.charts",
+              "source": "url",
+              "type": "json",
+              "url": "/dashboard-config?scenario=${scenario}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            },
+            "queryType": "infinity",
+            "refId": "variable"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
+      }
+    }
+  ]
+}
