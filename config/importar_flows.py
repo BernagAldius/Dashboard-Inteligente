@@ -56,9 +56,30 @@ def main():
                 print("[ERRO] Formato inesperado dos fluxos existentes.")
                 return 1
 
-            if existentes:
+            # Uma instalação inicial do Node-RED pode conter
+            # apenas um separador vazio e um comentário informativo.
+            tipos_iniciais = {"tab", "comment"}
+
+            instalacao_inicial = (
+                len(existentes) <= 2
+                and all(
+                    isinstance(no, dict)
+                    and no.get("type") in tipos_iniciais
+                    for no in existentes
+                )
+                and not any(
+                    no.get("type") == "tab"
+                    and no.get("label") != "Flow 1"
+                    for no in existentes
+                )
+            )
+
+            if existentes and not instalacao_inicial:
                 print(f"[OK] Fluxos existentes preservados: {len(existentes)} nós.")
                 return 0
+
+            if instalacao_inicial:
+                print("[INFO] Apenas os nós iniciais do Node-RED foram encontrados.")
 
         except json.JSONDecodeError:
             print("[ERRO] Ficheiro de fluxos existente inválido.")
