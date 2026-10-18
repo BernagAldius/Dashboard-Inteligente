@@ -528,6 +528,71 @@ if [[ "$RESPOSTA_ARRANQUE" =~ ^[Ss]$ ]]; then
 
     echo "[OK] docker-compose.yml valido."
     echo ""
+    echo "[INFO] A preparar plugin Infinity para o Grafana..."
+
+    PLUGIN_DIR="$PROJECT_ROOT/grafana/plugin-cache"
+    PLUGIN_ZIP="$PLUGIN_DIR/infinity-plugin.zip"
+    PLUGIN_URL="https://grafana.com/api/plugins/yesoreyeram-infinity-datasource/versions/4.1.1/download"
+
+    mkdir -p "$PLUGIN_DIR"
+
+    if [[ -f "$PLUGIN_ZIP" ]]; then
+        if ! python3 - "$PLUGIN_ZIP" <<'PLUGIN_CHECK'
+import sys
+import zipfile
+
+try:
+    with zipfile.ZipFile(sys.argv[1]) as arquivo:
+        valido = (
+            "yesoreyeram-infinity-datasource/plugin.json" in arquivo.namelist()
+            and arquivo.testzip() is None
+        )
+except (OSError, zipfile.BadZipFile):
+    valido = False
+
+sys.exit(0 if valido else 1)
+PLUGIN_CHECK
+        then
+            echo "[AVISO] ZIP existente invalido. Sera descarregado novamente."
+            rm -f "$PLUGIN_ZIP"
+        fi
+    fi
+
+    if [[ ! -f "$PLUGIN_ZIP" ]]; then
+        echo "[INFO] A descarregar Infinity 4.1.1 por IPv4..."
+
+        if ! curl -4 -fL --retry 3 --connect-timeout 15 --max-time 300 \
+            -o "$PLUGIN_ZIP.tmp" "$PLUGIN_URL"; then
+            rm -f "$PLUGIN_ZIP.tmp"
+            echo "[ERRO] Falha no download do plugin Infinity."
+            exit 1
+        fi
+
+        mv "$PLUGIN_ZIP.tmp" "$PLUGIN_ZIP"
+    fi
+
+    if ! python3 - "$PLUGIN_ZIP" <<'PLUGIN_CHECK'
+import sys
+import zipfile
+
+try:
+    with zipfile.ZipFile(sys.argv[1]) as arquivo:
+        valido = (
+            "yesoreyeram-infinity-datasource/plugin.json" in arquivo.namelist()
+            and arquivo.testzip() is None
+        )
+except (OSError, zipfile.BadZipFile):
+    valido = False
+
+sys.exit(0 if valido else 1)
+PLUGIN_CHECK
+    then
+        echo "[ERRO] O ficheiro ZIP do Infinity esta invalido."
+        exit 1
+    fi
+
+    echo "[OK] Plugin Infinity preparado."
+
     echo "[INFO] A construir e iniciar os servicos..."
 
     # --build permite construir as imagens locais numa maquina limpa.

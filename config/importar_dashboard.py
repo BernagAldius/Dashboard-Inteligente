@@ -69,32 +69,32 @@ def pedido_api(url, metodo, credenciais, dados=None):
     return urllib.request.urlopen(pedido, timeout=10)
 
 def pedido_api_com_tentativas(url, metodo, credenciais, dados=None):
-    """Repete pedidos quando o Grafana ainda está a inicializar."""
+    ultimo_erro = None
 
-    for tentativa in range(15):
+    for tentativa in range(60):
         try:
             return pedido_api(url, metodo, credenciais, dados)
 
         except urllib.error.HTTPError as erro:
-            if erro.code not in (502, 503, 504):
+            if erro.code not in (429, 500, 502, 503, 504):
                 raise
-
             ultimo_erro = erro
 
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as erro:
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as erro:
             ultimo_erro = erro
 
         print(
-            f"[AVISO] Grafana ainda não está pronto. "
-            f"Tentativa {tentativa + 1}/15."
+            f"[AVISO] Grafana ainda nao esta pronto. "
+            f"Tentativa {tentativa + 1}/60."
         )
 
-        if tentativa < 14:
+        if tentativa < 59:
             time.sleep(2)
 
     raise RuntimeError(
-        f"A API do Grafana não ficou pronta: {ultimo_erro}"
+        f"A API do Grafana nao ficou pronta: {ultimo_erro}"
     )
+
 
 def main():
     if not DASHBOARD_JSON.exists():
@@ -139,8 +139,14 @@ def main():
 
     dados = json.dumps(recurso).encode("utf-8")
 
-    with pedido_api_com_tentativas(API_URL, "POST", credenciais, dados):
-        print("[OK] Dashboard v2 importada com sucesso.")
+    try:
+        with pedido_api_com_tentativas(API_URL, "POST", credenciais, dados):
+            print("[OK] Dashboard v2 importada com sucesso.")
+    except urllib.error.HTTPError as erro:
+        if erro.code != 409:
+            raise
+        with pedido_api_com_tentativas(url_dashboard, "GET", credenciais):
+            print("[OK] Dashboard ja existe. Importacao concluida.")
 
 
 if __name__ == "__main__":

@@ -31,3 +31,5 @@ __pycache__/
 
 # Copias de seguranca
 *.bak
+# Plugin Infinity descarregado durante a instalacao
+grafana/plugin-cache/
