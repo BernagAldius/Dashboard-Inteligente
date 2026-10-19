@@ -108,7 +108,8 @@ def main():
         try:
             with pedido_api(f"{GRAFANA_URL}/api/health", "GET", credenciais):
                 break
-        except (urllib.error.URLError, TimeoutError):
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError):
+            print(f"[AVISO] Grafana a iniciar. Tentativa {tentativa + 1}/60.")
             time.sleep(2)
     else:
         raise RuntimeError("O Grafana não ficou disponível dentro do tempo limite.")
