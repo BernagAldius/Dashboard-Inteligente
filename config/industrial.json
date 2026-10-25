@@ -9,7 +9,8 @@
       "temperatura": true,
       "humidade": true,
       "luminosidade": true,
-      "movimento": false
+      "movimento": false,
+      "consumo_energetico": true
     }
   },
   "zones": [
@@ -54,6 +55,24 @@
               "alerts": {
                 "min": 100.0,
                 "max": 800.0
+              }
+            }
+          ]
+        },
+        {
+          "id": "sensor_004",
+          "name": "Sensor Consumo Energético",
+          "type": "personalizado",
+          "metrics": [
+            {
+              "field": "consumo_energetico",
+              "label": "Consumo Energético",
+              "unit": "kWh",
+              "data_type": "number",
+              "measurement_type": "acumulado",
+              "alerts": {
+                "min": 0.0,
+                "max": 500.0
               }
             }
           ]

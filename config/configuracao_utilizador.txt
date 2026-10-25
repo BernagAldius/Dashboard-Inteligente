@@ -2,7 +2,7 @@
 # Altere apenas os valores depois do sinal =
 
 # Cenários disponíveis: domotica, industrial, agricultura
-cenario=industrial
+cenario=agricultura
 
 temperatura=true
 temperatura_min=10
@@ -17,3 +17,13 @@ luminosidade_min=100
 luminosidade_max=800
 
 movimento=false
+
+# NOVA MÉTRICA — AGRICULTURA
+metrica_humidade_solo=true
+metrica_humidade_solo_nome=Humidade do Solo
+metrica_humidade_solo_unidade=%
+metrica_humidade_solo_tipo=instantaneo
+metrica_humidade_solo_sensor=sensor_004
+metrica_humidade_solo_min=20
+metrica_humidade_solo_max=80
+metrica_humidade_solo_grafico=barra

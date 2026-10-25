@@ -1,7 +1,7 @@
 apiVersion: 1
 
 datasources:
-  - name: InfluxDB
+  - name: influxdb
     uid: afra0bj7axla8d
     type: influxdb
     access: proxy
@@ -13,11 +13,11 @@ datasources:
       defaultBucket: iot_data
     secureJsonData:
       token: $INFLUX_TOKEN
-  - name: Infinity-Configuracao
+  - name: Dashboard Config API
     uid: eftlp2b7qhypse
     type: yesoreyeram-infinity-datasource
     access: proxy
-  - name: Infinity-Analytics
+  - name: Python Analytics API
     uid: dfxo5beum0poga
     type: yesoreyeram-infinity-datasource
     access: proxy

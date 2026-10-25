@@ -9,7 +9,8 @@
       "temperatura": true,
       "humidade": true,
       "luminosidade": true,
-      "movimento": false
+      "movimento": false,
+      "consumo_agua": true
     }
   },
   "zones": [
@@ -27,8 +28,8 @@
               "label": "Temperatura",
               "unit": "°C",
               "alerts": {
-                "min": 15.0,
-                "max": 28.0
+                "min": 10.0,
+                "max": 30.0
               }
             },
             {
@@ -37,7 +38,7 @@
               "unit": "%",
               "alerts": {
                 "min": 35.0,
-                "max": 70.0
+                "max": 75.0
               }
             }
           ]
@@ -53,7 +54,25 @@
               "unit": "lux",
               "alerts": {
                 "min": 100.0,
-                "max": 700.0
+                "max": 800.0
+              }
+            }
+          ]
+        },
+        {
+          "id": "sensor_004",
+          "name": "Sensor Consumo de Água",
+          "type": "personalizado",
+          "metrics": [
+            {
+              "field": "consumo_agua",
+              "label": "Consumo de Água",
+              "unit": "L",
+              "data_type": "number",
+              "measurement_type": "acumulado",
+              "alerts": {
+                "min": 0.0,
+                "max": 500.0
               }
             }
           ]

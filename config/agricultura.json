@@ -9,7 +9,8 @@
       "temperatura": true,
       "humidade": true,
       "luminosidade": true,
-      "movimento": false
+      "movimento": false,
+      "humidade_solo": true
     }
   },
   "zones": [
@@ -28,7 +29,7 @@
               "unit": "°C",
               "alerts": {
                 "min": 10.0,
-                "max": 35.0
+                "max": 30.0
               }
             },
             {
@@ -36,8 +37,8 @@
               "label": "Humidade",
               "unit": "%",
               "alerts": {
-                "min": 40.0,
-                "max": 85.0
+                "min": 35.0,
+                "max": 75.0
               }
             }
           ]
@@ -52,9 +53,28 @@
               "label": "Luminosidade",
               "unit": "lux",
               "alerts": {
-                "min": 150.0,
-                "max": 900.0
+                "min": 100.0,
+                "max": 800.0
               }
+            }
+          ]
+        },
+        {
+          "id": "sensor_004",
+          "name": "Sensor Humidade do Solo",
+          "type": "personalizado",
+          "metrics": [
+            {
+              "field": "humidade_solo",
+              "label": "Humidade do Solo",
+              "unit": "%",
+              "data_type": "number",
+              "measurement_type": "instantaneo",
+              "alerts": {
+                "min": 20.0,
+                "max": 80.0
+              },
+              "chart_type": "barra"
             }
           ]
         }

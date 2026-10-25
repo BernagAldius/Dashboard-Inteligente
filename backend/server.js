@@ -104,12 +104,20 @@ client.on('message', async (topic, message) => {
     try {
         const data = JSON.parse(message.toString());
 
+        // Utilizar o timestamp recebido ou a data atual, caso seja inválido
+        const receivedDate = new Date(data.timestamp);
+        const validDate = Number.isNaN(receivedDate.getTime())
+            ? new Date()
+            : receivedDate;
+
+        data.timestamp = validDate.toISOString();
+
         console.log('New Sensor Data:', data);
 
         const point = new Point('sensor_readings')
             .tag('sensor_id', data.sensor_id)
             .tag('tipo', data.tipo)
-            .timestamp(new Date(data.timestamp));
+            .timestamp(validDate);
 
         // Guardar campos numéricos dinamicamente
         Object.keys(data).forEach((key) => {
@@ -234,20 +242,81 @@ app.get('/sensor-data', async (req, res) => {
     try {
         const rows = await queryApi.collectRows(fluxQuery);
 
-        const results = rows.map((row) => ({
-            time: row._time,
-            sensor_id: row.sensor_id,
-            tipo: row.tipo,
-            temperatura: row.temperatura,
-            humidade: row.humidade,
-            luminosidade: row.luminosidade,
-            movimento: row.movimento,
-            temperatura_media_movel: row.temperatura_media_movel,
-            humidade_media_movel: row.humidade_media_movel,
-            anomalia: row.anomalia,
-            tendencia: row.tendencia,
-            alertas: row.alertas
-        }));
+        const results = rows.map((row) => {
+            const {
+                result,
+                table,
+                _start,
+                _stop,
+                _time,
+                _measurement,
+                ...metricas
+            } = row;
+
+            return {
+                time: _time,
+                ...metricas
+            };
+        });
+
+        // Identificar métricas acumuladas nos cenários configurados
+        const metricasAcumuladas = new Set();
+
+        for (const cenario of ['agricultura', 'domotica', 'industrial']) {
+            const ficheiro = path.join('/config', `${cenario}.json`);
+
+            if (!fs.existsSync(ficheiro)) {
+                continue;
+            }
+
+            const configuracao = JSON.parse(
+                fs.readFileSync(ficheiro, 'utf8')
+            );
+
+            for (const zona of configuracao.zones || []) {
+                for (const sensor of zona.sensors || []) {
+                    for (const metrica of sensor.metrics || []) {
+                        if (metrica.measurement_type === 'acumulado') {
+                            metricasAcumuladas.add(metrica.field);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Ordenar cronologicamente para calcular diferenças
+        results.sort((a, b) =>
+            new Date(a.time) - new Date(b.time)
+        );
+
+        // Última leitura de cada métrica por sensor
+        const anteriores = new Map();
+
+        for (const registo of results) {
+            for (const campo of metricasAcumuladas) {
+                const valor = registo[campo];
+
+                if (typeof valor !== 'number') {
+                    continue;
+                }
+
+                const chave = `${registo.sensor_id}:${campo}`;
+                const anterior = anteriores.get(chave);
+
+                if (anterior !== undefined) {
+                    const diferenca = valor - anterior;
+
+                    // Uma diminuição pode indicar reinicialização do contador
+                    registo[`${campo}_intervalo`] =
+                        diferenca >= 0 ? diferenca : null;
+                } else {
+                    // Não existe leitura anterior dentro da janela consultada
+                    registo[`${campo}_intervalo`] = null;
+                }
+
+                anteriores.set(chave, valor);
+            }
+        }
 
         res.json(results);
     } catch (error) {

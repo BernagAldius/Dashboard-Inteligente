@@ -8,6 +8,17 @@ TXT_FILE = CONFIG_DIR / "configuracao_utilizador.txt"
 
 CENARIOS_VALIDOS = {"domotica", "industrial", "agricultura"}
 
+# Campos que podem ser definidos para cada nova métrica
+CAMPOS_METRICA = {
+    "nome",
+    "unidade",
+    "tipo",
+    "sensor",
+    "min",
+    "max",
+    "grafico",
+}
+
 
 def ler_configuracao():
     configuracao = {}
@@ -39,6 +50,118 @@ def ler_configuracao():
 
     return configuracao
 
+def identificar_novas_metricas(configuracao):
+    novas_metricas = {}
+
+    for chave, valor in configuracao.items():
+        if not chave.startswith("metrica_"):
+            continue
+
+        restante = chave[len("metrica_"):]
+
+        campo_encontrado = None
+        nome_metrica = restante
+
+        for campo in CAMPOS_METRICA:
+            sufixo = f"_{campo}"
+
+            if restante.endswith(sufixo):
+                nome_metrica = restante[:-len(sufixo)]
+                campo_encontrado = campo
+                break
+
+        if not nome_metrica:
+            raise ValueError(
+                f"Nome de métrica inválido: '{chave}'."
+            )
+
+        if nome_metrica not in novas_metricas:
+            novas_metricas[nome_metrica] = {}
+
+        if campo_encontrado:
+            novas_metricas[nome_metrica][campo_encontrado] = valor
+        else:
+            novas_metricas[nome_metrica]["ativo"] = valor
+
+    return novas_metricas
+
+def validar_novas_metricas(configuracao):
+    novas_metricas = identificar_novas_metricas(configuracao)
+
+    campos_obrigatorios = {
+        "ativo", "nome", "unidade",
+        "tipo", "sensor", "min", "max"
+    }
+
+    for identificador, dados in novas_metricas.items():
+        em_falta = campos_obrigatorios - dados.keys()
+
+        if em_falta:
+            raise ValueError(
+                f"Métrica '{identificador}': "
+                f"faltam os campos {', '.join(sorted(em_falta))}."
+            )
+
+        if dados["ativo"].lower() not in {"true", "false"}:
+            raise ValueError(
+                f"Métrica '{identificador}': "
+                "o estado deve ser true ou false."
+            )
+
+        dados["ativo"] = dados["ativo"].lower() == "true"
+
+        if dados["tipo"] not in {"instantaneo", "acumulado"}:
+            raise ValueError(
+                f"Métrica '{identificador}': "
+                "o tipo deve ser instantaneo ou acumulado."
+            )
+
+        grafico = dados.get("grafico", "automatico").lower()
+
+        if grafico not in {"automatico", "linha", "barra"}:
+            raise ValueError(
+                f"Métrica '{identificador}': "
+                "o gráfico deve ser automatico, linha ou barra."
+            )
+
+        if grafico == "automatico":
+            grafico = (
+                "barra"
+                if dados["tipo"] == "acumulado"
+                else "linha"
+            )
+
+        dados["grafico"] = grafico
+
+        if not dados["nome"].strip():
+            raise ValueError(
+                f"Métrica '{identificador}': nome vazio."
+            )
+
+        if not dados["sensor"].strip():
+            raise ValueError(
+                f"Métrica '{identificador}': sensor vazio."
+            )
+
+        try:
+            minimo = float(dados["min"])
+            maximo = float(dados["max"])
+        except ValueError:
+            raise ValueError(
+                f"Métrica '{identificador}': "
+                "os limites devem ser números."
+            )
+
+        if minimo >= maximo:
+            raise ValueError(
+                f"Métrica '{identificador}': "
+                "o mínimo deve ser inferior ao máximo."
+            )
+
+        dados["min"] = minimo
+        dados["max"] = maximo
+
+    return novas_metricas
 
 def validar_configuracao(configuracao):
     campos_obrigatorios = [
@@ -116,6 +239,62 @@ def validar_configuracao(configuracao):
     print("Configuração validada com sucesso.")
     print(f"Cenário selecionado: {configuracao['cenario']}")
 
+def aplicar_novas_metricas(dados, novas_metricas):
+    for identificador, definicao in novas_metricas.items():
+
+        sensor_encontrado = None
+
+        # Procurar o sensor indicado na configuração
+        for zona in dados["zones"]:
+            for sensor in zona["sensors"]:
+                if sensor["id"] == definicao["sensor"]:
+                    sensor_encontrado = sensor
+                    break
+
+            if sensor_encontrado:
+                break
+
+        # Criar o sensor caso ainda não exista
+        if sensor_encontrado is None:
+            sensor_encontrado = {
+                "id": definicao["sensor"],
+                "name": f"Sensor {definicao['nome']}",
+                "type": "personalizado",
+                "metrics": []
+            }
+
+            dados["zones"][0]["sensors"].append(sensor_encontrado)
+
+        # Procurar a métrica para evitar duplicados
+        metrica_encontrada = None
+
+        for metrica in sensor_encontrado["metrics"]:
+            if metrica["field"] == identificador:
+                metrica_encontrada = metrica
+                break
+
+        if metrica_encontrada is None:
+            metrica_encontrada = {}
+            sensor_encontrado["metrics"].append(metrica_encontrada)
+
+        metrica_encontrada.update({
+            "field": identificador,
+            "label": definicao["nome"],
+            "unit": definicao["unidade"],
+            "data_type": "number",
+            "measurement_type": definicao["tipo"],
+            "chart_type": definicao["grafico"],
+            "alerts": {
+                "min": definicao["min"],
+                "max": definicao["max"]
+            }
+        })
+
+        # Atualizar a visibilidade da métrica
+        dados["dashboard"]["charts"][identificador] = definicao["ativo"]
+
+        print(f"Métrica '{identificador}' configurada com sucesso.")
+
 def atualizar_json(configuracao):
     cenario = configuracao["cenario"]
     json_file = CONFIG_DIR / f"{cenario}.json"
@@ -144,6 +323,10 @@ def atualizar_json(configuracao):
                 if campo in {"temperatura", "humidade", "luminosidade"}:
                     metrica["alerts"]["min"] = configuracao[f"{campo}_min"]
                     metrica["alerts"]["max"] = configuracao[f"{campo}_max"]
+
+     # Aplicar novas métricas definidas no TXT
+    novas_metricas = validar_novas_metricas(configuracao)
+    aplicar_novas_metricas(dados, novas_metricas)
 
     print(f"Configuração preparada para '{json_file.name}'.")
 
