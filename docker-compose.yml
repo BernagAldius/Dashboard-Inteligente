@@ -51,6 +51,8 @@ services:
     depends_on:
       - influxdb
       - mosquitto
+    volumes:
+      - ./config:/config:ro
 
   frontend:
     build: ./frontend

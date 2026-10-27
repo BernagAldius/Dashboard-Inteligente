@@ -1,0 +1,203 @@
+[
+  {
+    "id": "bb0bf1c36ed44bcf",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Gerar Humidade Solo Simulator",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 760,
+    "wires": [
+      [
+        "12062d47883446bd"
+      ]
+    ]
+  },
+  {
+    "id": "c92b746d8972427b",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Gerar Consumo Agua Simulator",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 775,
+    "wires": [
+      [
+        "fe1d970e26a147cd"
+      ]
+    ]
+  },
+  {
+    "id": "5e3191bc97c54f4e",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Gerar Consumo Energetico Simulator",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 790,
+    "wires": [
+      [
+        "5c400726ede9496a"
+      ]
+    ]
+  },
+  {
+    "id": "12062d47883446bd",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Humidade Solo Simulator",
+    "func": "msg.payload = {\n    sensor_id: \"sensor_004\",\n    tipo: \"agricultura\",\n    humidade_solo: Math.floor(Math.random() * 61) + 20,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 760,
+    "wires": [
+      [
+        "7dfcf18932e342ad"
+      ]
+    ]
+  },
+  {
+    "id": "fe1d970e26a147cd",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Consumo Agua Simulator",
+    "func": "let total = context.get(\"total\") ?? 125;\ntotal += Math.round((Math.random() * 2 + 0.2) * 100) / 100;\ncontext.set(\"total\", total);\nmsg.payload = {\n    sensor_id: \"sensor_005\",\n    tipo: \"domotica\",\n    consumo_agua: Math.round(total * 100) / 100,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 775,
+    "wires": [
+      [
+        "568db03793d6483a"
+      ]
+    ]
+  },
+  {
+    "id": "5c400726ede9496a",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Consumo Energetico Simulator",
+    "func": "let total = context.get(\"total\") ?? 250;\ntotal += Math.round((Math.random() * 0.3 + 0.02) * 1000) / 1000;\ncontext.set(\"total\", total);\nmsg.payload = {\n    sensor_id: \"sensor_006\",\n    tipo: \"industrial\",\n    consumo_energetico: Math.round(total * 1000) / 1000,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 790,
+    "wires": [
+      [
+        "6a991a24db0e4ebd"
+      ]
+    ]
+  },
+  {
+    "id": "7dfcf18932e342ad",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Humidade Solo Simulator",
+    "topic": "sensors/agricultura/004",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 720,
+    "y": 760,
+    "wires": []
+  },
+  {
+    "id": "568db03793d6483a",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Consumo Agua Simulator",
+    "topic": "sensors/domotica/005",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 720,
+    "y": 775,
+    "wires": []
+  },
+  {
+    "id": "6a991a24db0e4ebd",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Consumo Energetico Simulator",
+    "topic": "sensors/industrial/006",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 720,
+    "y": 790,
+    "wires": []
+  }
+]

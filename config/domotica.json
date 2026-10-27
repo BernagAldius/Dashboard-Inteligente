@@ -60,7 +60,7 @@
           ]
         },
         {
-          "id": "sensor_004",
+          "id": "sensor_005",
           "name": "Sensor Consumo de Água",
           "type": "personalizado",
           "metrics": [
@@ -73,7 +73,21 @@
               "alerts": {
                 "min": 0.0,
                 "max": 500.0
-              }
+              },
+              "analysis": {
+                "enabled": true,
+                "window_size": 20,
+                "trend": {
+                  "gradual_change": 0.3,
+                  "rapid_change": 0.8
+                  },
+                  "anomaly": {
+                    "method": "zscore",
+                    "threshold": 2.0,
+                    "tolerance": 0.1
+                  }
+                },
+              "chart_type": "linha"
             }
           ]
         }

@@ -60,7 +60,7 @@
           ]
         },
         {
-          "id": "sensor_004",
+          "id": "sensor_006",
           "name": "Sensor Consumo Energético",
           "type": "personalizado",
           "metrics": [
@@ -73,7 +73,21 @@
               "alerts": {
                 "min": 0.0,
                 "max": 500.0
-              }
+              },
+              "analysis": {
+                 "enabled": true,
+                 "window_size": 20,
+                 "trend": {
+                    "gradual_change": 0.05,
+                    "rapid_change": 0.15
+                  },
+                  "anomaly": {
+                    "method": "zscore",
+                      "threshold": 2.0,
+                      "tolerance": 0.01
+                      }
+                  },
+              "chart_type": "linha"
             }
           ]
         }

@@ -1,671 +1,872 @@
 [
-    {
-        "id": "f84a663b31f096d7",
-        "type": "tab",
-        "label": "Flow 1",
-        "disabled": false,
-        "info": ""
-    },
-    {
-        "id": "3f93e0e0fa0e28c2",
-        "type": "mqtt-broker",
-        "name": "",
-        "broker": "mosquitto",
-        "port": 1883,
-        "clientid": "",
-        "autoConnect": true,
-        "usetls": false,
-        "protocolVersion": 4,
-        "keepalive": 60,
-        "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthRetain": "false",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closeRetain": "false",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willRetain": "false",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
-        "id": "61332c29592423f3",
-        "type": "inject",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "10",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 150,
-        "y": 60,
-        "wires": [
-            [
-                "4493eb6083274842"
-            ]
-        ]
-    },
-    {
-        "id": "4493eb6083274842",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Sensor Sim",
-        "func": "msg.payload = {\n    sensor_id: \"sensor_001\",\n    tipo: \"ambiental\",\n    temperatura: Math.floor(Math.random() * 15) + 20,\n    humidade: Math.floor(Math.random() * 40) + 40,\n    timestamp: new Date().toISOString()\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 330,
-        "y": 60,
-        "wires": [
-            [
-                "35de72637bc56782",
-                "96e95458d702a2a3"
-            ]
-        ]
-    },
-    {
-        "id": "dbe94f5134464cf1",
-        "type": "mqtt out",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "topic": "sensors/ambiental/001",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3f93e0e0fa0e28c2",
-        "x": 960,
-        "y": 60,
-        "wires": []
-    },
-    {
-        "id": "35de72637bc56782",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 1",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 540,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "96e95458d702a2a3",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Analysis Engine",
-        "func": "let data = msg.payload;\n\n// Converter valores para número\nconst temperatura = Number(data.temperatura);\nconst humidade = Number(data.humidade);\n\n// -------------------------------------------------\n// CONFIGURAÇÃO ATIVA\n// -------------------------------------------------\n\nconst config = global.get(\"dashboardConfig\");\n\nif (!config) {\n    node.error(\"Configuração ativa não encontrada\", msg);\n    return null;\n}\n\n// Procurar o sensor_001 em todas as zonas\nlet sensorConfig = null;\n\nfor (const zone of config.zones) {\n    const sensor = zone.sensors.find(\n        s => s.id === \"sensor_001\"\n    );\n\n    if (sensor) {\n        sensorConfig = sensor;\n        break;\n    }\n}\n\nif (!sensorConfig) {\n    node.error(\n        \"sensor_001 não encontrado na configuração ativa\",\n        msg\n    );\n    return null;\n}\n\n// Procurar configuração das métricas\nconst tempConfig = sensorConfig.metrics.find(\n    metric => metric.field === \"temperatura\"\n);\n\nconst humConfig = sensorConfig.metrics.find(\n    metric => metric.field === \"humidade\"\n);\n\nif (!tempConfig || !humConfig) {\n    node.error(\n        \"Configuração de temperatura ou humidade não encontrada\",\n        msg\n    );\n    return null;\n}\n\n// Limites provenientes do cenário ativo\nconst tempMin = Number(tempConfig.alerts.min);\nconst tempMax = Number(tempConfig.alerts.max);\n\nconst humMin = Number(humConfig.alerts.min);\nconst humMax = Number(humConfig.alerts.max);\n\n// -------------------------------------------------\n// HISTÓRICO\n// -------------------------------------------------\n\nlet history = context.get(\"history\") || [];\n\nhistory.push({\n    temperatura: temperatura,\n    humidade: humidade,\n    timestamp: data.timestamp\n});\n\nif (history.length > 5) {\n    history = history.slice(-5);\n}\n\ncontext.set(\"history\", history);\n\n// Função para calcular média\nfunction average(values) {\n    if (values.length === 0) {\n        return 0;\n    }\n\n    const total = values.reduce(\n        (sum, value) => sum + Number(value),\n        0\n    );\n\n    return total / values.length;\n}\n\n// Médias móveis\nconst tempAvg = average(\n    history.map(item => item.temperatura)\n);\n\nconst humAvg = average(\n    history.map(item => item.humidade)\n);\n\n// -------------------------------------------------\n// THRESHOLDS DINÂMICOS\n// -------------------------------------------------\n\nlet alerts = [];\n\nif (temperatura < tempMin) {\n    alerts.push(\"Temperatura abaixo do limite\");\n}\n\nif (temperatura > tempMax) {\n    alerts.push(\"Temperatura acima do limite\");\n}\n\nif (humidade < humMin) {\n    alerts.push(\"Humidade abaixo do limite\");\n}\n\nif (humidade > humMax) {\n    alerts.push(\"Humidade acima do limite\");\n}\n\n// -------------------------------------------------\n// DETEÇÃO DE TENDÊNCIA\n// -------------------------------------------------\n\nlet tempTrend = \"estável\";\nlet humTrend = \"estável\";\n\nif (history.length >= 3) {\n\n    const firstReading = history[0];\n    const lastReading = history[history.length - 1];\n\n    const tempDifference =\n        lastReading.temperatura - firstReading.temperatura;\n\n    const humDifference =\n        lastReading.humidade - firstReading.humidade;\n\n    // Tendência da temperatura\n    if (tempDifference >= 5) {\n        tempTrend = \"subida rápida\";\n    } else if (tempDifference >= 2) {\n        tempTrend = \"subida gradual\";\n    } else if (tempDifference <= -5) {\n        tempTrend = \"descida rápida\";\n    } else if (tempDifference <= -2) {\n        tempTrend = \"descida gradual\";\n    } else {\n        tempTrend = \"estável\";\n    }\n\n    // Tendência da humidade\n    if (humDifference >= 10) {\n        humTrend = \"subida rápida\";\n    } else if (humDifference >= 4) {\n        humTrend = \"subida gradual\";\n    } else if (humDifference <= -10) {\n        humTrend = \"descida rápida\";\n    } else if (humDifference <= -4) {\n        humTrend = \"descida gradual\";\n    } else {\n        humTrend = \"estável\";\n    }\n}\n\n// -------------------------------------------------\n// DETEÇÃO DE ANOMALIAS\n// -------------------------------------------------\n\nlet anomaly = false;\n\nif (Math.abs(temperatura - tempAvg) > 6) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: variação brusca de temperatura\"\n    );\n}\n\nif (Math.abs(humidade - humAvg) > 15) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: variação brusca de humidade\"\n    );\n}\n\n// -------------------------------------------------\n// ESTADO GERAL\n// -------------------------------------------------\n\nlet estado = \"normal\";\n\nif (alerts.length > 0) {\n    estado = \"aviso\";\n}\n\nif (anomaly) {\n    estado = \"alerta\";\n}\n\n// -------------------------------------------------\n// RESULTADO DA ANÁLISE\n// -------------------------------------------------\n\nmsg.payload = {\n    ...data,\n\n    temperatura: temperatura,\n    humidade: humidade,\n\n    analytics: {\n        temperatura_media_movel:\n            Number(tempAvg.toFixed(2)),\n\n        humidade_media_movel:\n            Number(humAvg.toFixed(2)),\n\n        tendencia_temperatura:\n            tempTrend,\n\n        tendencia_humidade:\n            humTrend,\n\n        estado:\n            estado,\n\n        anomalia:\n            anomaly,\n\n        alertas:\n            alerts,\n\n        limites: {\n            temperatura: {\n                min: tempMin,\n                max: tempMax\n            },\n\n            humidade: {\n                min: humMin,\n                max: humMax\n            }\n        },\n\n        scenario:\n            config.scenario.id\n    }\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 580,
-        "y": 60,
-        "wires": [
-            [
-                "dbe94f5134464cf1",
-                "36860a36478a321c",
-                "d63f3f1aa01c5b8d"
-            ]
-        ]
-    },
-    {
-        "id": "36860a36478a321c",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 2",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 820,
-        "y": 200,
-        "wires": []
-    },
-    {
-        "id": "21caeb6c7c5ec864",
-        "type": "inject",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "10",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 150,
-        "y": 280,
-        "wires": [
-            [
-                "6f49577626e02778"
-            ]
-        ]
-    },
-    {
-        "id": "6f49577626e02778",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Luminosity Simulator",
-        "func": "msg.payload = {\n    sensor_id: \"sensor_002\",\n    tipo: \"luminosidade\",\n    luminosidade: Math.floor(Math.random() * 1000),\n    timestamp: new Date().toISOString()\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 280,
-        "wires": [
-            [
-                "01dd637c639f53a1",
-                "af116b5785b33ce6",
-                "d63f3f1aa01c5b8d"
-            ]
-        ]
-    },
-    {
-        "id": "d6dd36af8a1dee62",
-        "type": "mqtt out",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "topic": "sensors/luminosidade/002",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3f93e0e0fa0e28c2",
-        "x": 850,
-        "y": 280,
-        "wires": []
-    },
-    {
-        "id": "01dd637c639f53a1",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 3",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 600,
-        "y": 400,
-        "wires": []
-    },
-    {
-        "id": "af116b5785b33ce6",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Analysis Engine",
-        "func": "let data = msg.payload;\n\n// Converter luminosidade para número\nconst luminosidade = Number(data.luminosidade);\n\n// -------------------------------------------------\n// CONFIGURAÇÃO ATIVA\n// -------------------------------------------------\n\nconst config = global.get(\"dashboardConfig\");\n\nif (!config) {\n    node.error(\"Configuração ativa não encontrada\", msg);\n    return null;\n}\n\n// Procurar o sensor_002 em todas as zonas\nlet sensorConfig = null;\n\nfor (const zone of config.zones) {\n    const sensor = zone.sensors.find(\n        s => s.id === \"sensor_002\"\n    );\n\n    if (sensor) {\n        sensorConfig = sensor;\n        break;\n    }\n}\n\nif (!sensorConfig) {\n    node.error(\n        \"sensor_002 não encontrado na configuração ativa\",\n        msg\n    );\n    return null;\n}\n\n// Procurar configuração da luminosidade\nconst luminosityConfig = sensorConfig.metrics.find(\n    metric => metric.field === \"luminosidade\"\n);\n\nif (!luminosityConfig) {\n    node.error(\n        \"Configuração de luminosidade não encontrada\",\n        msg\n    );\n    return null;\n}\n\n// Limites provenientes do cenário ativo\nconst luminosityMin =\n    Number(luminosityConfig.alerts.min);\n\nconst luminosityMax =\n    Number(luminosityConfig.alerts.max);\n\n// -------------------------------------------------\n// HISTÓRICO\n// -------------------------------------------------\n\nlet history =\n    context.get(\"history_luminosidade\") || [];\n\nhistory.push({\n    luminosidade: luminosidade,\n    timestamp: data.timestamp\n});\n\nif (history.length > 5) {\n    history = history.slice(-5);\n}\n\ncontext.set(\"history_luminosidade\", history);\n\n// Função para calcular média\nfunction average(values) {\n    if (values.length === 0) {\n        return 0;\n    }\n\n    const total = values.reduce(\n        (sum, value) => sum + Number(value),\n        0\n    );\n\n    return total / values.length;\n}\n\n// Média móvel\nconst luminosityAvg = average(\n    history.map(item => item.luminosidade)\n);\n\n// -------------------------------------------------\n// THRESHOLDS DINÂMICOS\n// -------------------------------------------------\n\nlet alerts = [];\n\nif (luminosidade < luminosityMin) {\n    alerts.push(\"Luminosidade abaixo do limite\");\n}\n\nif (luminosidade > luminosityMax) {\n    alerts.push(\"Luminosidade acima do limite\");\n}\n\n// -------------------------------------------------\n// TENDÊNCIA\n// -------------------------------------------------\n\nlet trend = \"estável\";\n\nif (history.length >= 3) {\n\n    const firstValue =\n        history[0].luminosidade;\n\n    const lastValue =\n        history[history.length - 1].luminosidade;\n\n    const difference =\n        lastValue - firstValue;\n\n    if (difference >= 200) {\n        trend = \"subida rápida\";\n    } else if (difference >= 80) {\n        trend = \"subida gradual\";\n    } else if (difference <= -200) {\n        trend = \"descida rápida\";\n    } else if (difference <= -80) {\n        trend = \"descida gradual\";\n    }\n}\n\n// -------------------------------------------------\n// ANOMALIA\n// -------------------------------------------------\n\nlet anomaly = false;\n\nif (\n    Math.abs(\n        luminosidade - luminosityAvg\n    ) > 300\n) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: variação brusca de luminosidade\"\n    );\n}\n\n// -------------------------------------------------\n// ESTADO GERAL\n// -------------------------------------------------\n\nlet estado = \"normal\";\n\nif (alerts.length > 0) {\n    estado = \"aviso\";\n}\n\nif (anomaly) {\n    estado = \"alerta\";\n}\n\n// -------------------------------------------------\n// RESULTADO\n// -------------------------------------------------\n\nmsg.payload = {\n    ...data,\n\n    luminosidade: luminosidade,\n\n    analytics: {\n        luminosidade_media_movel:\n            Number(luminosityAvg.toFixed(2)),\n\n        tendencia_luminosidade:\n            trend,\n\n        estado:\n            estado,\n\n        anomalia:\n            anomaly,\n\n        alertas:\n            alerts,\n\n        limites: {\n            luminosidade: {\n                min: luminosityMin,\n                max: luminosityMax\n            }\n        },\n\n        scenario:\n            config.scenario.id\n    }\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 600,
-        "y": 280,
-        "wires": [
-            [
-                "d6dd36af8a1dee62",
-                "9843fe47381b41a0"
-            ]
-        ]
-    },
-    {
-        "id": "9843fe47381b41a0",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 4",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 820,
-        "y": 400,
-        "wires": []
-    },
-    {
-        "id": "7bfd4ba147d31f75",
-        "type": "inject",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "10",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 110,
-        "y": 500,
-        "wires": [
-            [
-                "0c0704b414373e6e"
-            ]
-        ]
-    },
-    {
-        "id": "0c0704b414373e6e",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Motion Simulator",
-        "func": "msg.payload = {\n    sensor_id: \"sensor_003\",\n    tipo: \"movimento\",\n    movimento: Math.random() > 0.7,\n    timestamp: new Date().toISOString()\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 340,
-        "y": 500,
-        "wires": [
-            [
-                "c871552ed3fd0ecc",
-                "f84921e240d5f603",
-                "d63f3f1aa01c5b8d"
-            ]
-        ]
-    },
-    {
-        "id": "8810da10ae1fc16b",
-        "type": "mqtt out",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "topic": "sensors/movimento/003",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3f93e0e0fa0e28c2",
-        "x": 850,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "c871552ed3fd0ecc",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 5",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 580,
-        "y": 600,
-        "wires": []
-    },
-    {
-        "id": "f84921e240d5f603",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Analysis Engine",
-        "func": "let data = msg.payload;\n\n// Converter movimento para booleano\nconst movimento =\n    data.movimento === true ||\n    data.movimento === \"true\" ||\n    data.movimento === 1;\n\n// Histórico específico do sensor de movimento\nlet history = context.get(\"history_movimento\") || [];\n\n// Adicionar nova leitura\nhistory.push({\n    movimento: movimento,\n    timestamp: data.timestamp\n});\n\n// Manter apenas as últimas 10 leituras\nif (history.length > 10) {\n    history = history.slice(-10);\n}\n\ncontext.set(\"history_movimento\", history);\n\n// -------------------------------------------------\n// CONTAGEM DE MOVIMENTO\n// -------------------------------------------------\n\nconst motionCount = history.filter(\n    item => item.movimento === true\n).length;\n\n// -------------------------------------------------\n// ESTADO DE ATIVIDADE\n// -------------------------------------------------\n\nlet atividade = \"sem movimento\";\n\nif (movimento) {\n    atividade = \"movimento detetado\";\n}\n\nif (motionCount >= 7) {\n    atividade = \"atividade elevada\";\n}\n\n// -------------------------------------------------\n// ALERTAS\n// -------------------------------------------------\n\nlet alerts = [];\n\nif (motionCount >= 7) {\n    alerts.push(\n        \"Atividade elevada: movimento detetado frequentemente\"\n    );\n}\n\n// -------------------------------------------------\n// ANOMALIA\n// -------------------------------------------------\n\nlet anomaly = false;\n\n// Considerar anómala uma atividade muito frequente\n// nas últimas 10 leituras\nif (motionCount >= 9) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: movimento persistente\"\n    );\n}\n\n// -------------------------------------------------\n// ESTADO GERAL\n// -------------------------------------------------\n\nlet estado = \"normal\";\n\nif (alerts.length > 0) {\n    estado = \"aviso\";\n}\n\nif (anomaly) {\n    estado = \"alerta\";\n}\n\n// -------------------------------------------------\n// RESULTADO\n// -------------------------------------------------\n\nmsg.payload = {\n    ...data,\n\n    movimento: movimento,\n\n    analytics: {\n        atividade_movimento:\n            atividade,\n\n        movimentos_recentes:\n            motionCount,\n\n        estado:\n            estado,\n\n        anomalia:\n            anomaly,\n\n        alertas:\n            alerts\n    }\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 580,
-        "y": 500,
-        "wires": [
-            [
-                "8810da10ae1fc16b",
-                "2b734806788152f8"
-            ]
-        ]
-    },
-    {
-        "id": "2b734806788152f8",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 6",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 820,
-        "y": 600,
-        "wires": []
-    },
-    {
-        "id": "cb8a504a731c5181",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "FIWARE Formatter Sensor001",
-        "func": "msg.method = \"PATCH\";\nmsg.url = \"http://orion:1026/v2/entities/Sensor001/attrs\";\n\nmsg.headers = {\n    \"Content-Type\": \"application/json\"\n};\n\nmsg.payload = {\n    temperature: {\n        value: msg.payload.temperatura,\n        type: \"Number\"\n    },\n    humidity: {\n        value: msg.payload.humidade,\n        type: \"Number\"\n    },\n    anomaly: {\n        value: msg.payload.analytics?.anomalia || false,\n        type: \"Boolean\"\n    },\n    trend: {\n        value: msg.payload.analytics?.tendencia || \"estável\",\n        type: \"Text\"\n    }\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1330,
-        "y": 100,
-        "wires": [
-            [
-                "786777e23b7c3ab9"
-            ]
-        ]
-    },
-    {
-        "id": "786777e23b7c3ab9",
-        "type": "http request",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "method": "use",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 1590,
-        "y": 100,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "d63f3f1aa01c5b8d",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "FIWARE Formatter Universal",
-        "func": "const data = msg.payload;\n\nlet entityId = null;\nlet payload = {};\n\nif (data.sensor_id === \"sensor_001\") {\n    entityId = \"Sensor001\";\n\n    payload = {\n        temperature: {\n            value: data.temperatura,\n            type: \"Number\"\n        },\n        humidity: {\n            value: data.humidade,\n            type: \"Number\"\n        },\n        anomaly: {\n            value: data.analytics?.anomalia || false,\n            type: \"Boolean\"\n        },\n        trend: {\n            value: data.analytics?.tendencia || \"estável\",\n            type: \"Text\"\n        }\n    };\n}\n\nif (data.sensor_id === \"sensor_002\") {\n    entityId = \"Sensor002\";\n\n    payload = {\n        luminosity: {\n            value: data.luminosidade,\n            type: \"Number\"\n        }\n    };\n}\n\nif (data.sensor_id === \"sensor_003\") {\n    entityId = \"Sensor003\";\n\n    payload = {\n        motion: {\n            value: data.movimento,\n            type: \"Boolean\"\n        }\n    };\n}\n\nif (!entityId) {\n    node.warn(\"Sensor desconhecido: \" + data.sensor_id);\n    return null;\n}\n\nmsg.method = \"PATCH\";\nmsg.url = `http://orion:1026/v2/entities/${entityId}/attrs`;\nmsg.headers = {\n    \"Content-Type\": \"application/json\"\n};\nmsg.payload = payload;\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1260,
-        "y": 340,
-        "wires": [
-            [
-                "2f36d79952079ce9"
-            ]
-        ]
-    },
-    {
-        "id": "2f36d79952079ce9",
-        "type": "http request",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "method": "use",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 1530,
-        "y": 340,
-        "wires": [
-            [
-                "fbfb68515064ef51"
-            ]
-        ]
-    },
-    {
-        "id": "fbfb68515064ef51",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 7",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1720,
-        "y": 340,
-        "wires": []
-    },
-    {
-        "id": "d87542320e551d02",
-        "type": "inject",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "5",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 130,
-        "y": 720,
-        "wires": [
-            [
-                "cd48af8b9eb89916"
-            ]
-        ]
-    },
-    {
-        "id": "cd48af8b9eb89916",
-        "type": "http request",
-        "z": "f84a663b31f096d7",
-        "name": "Get Active Config",
-        "method": "GET",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://backend:3000/dashboard-config",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 330,
-        "y": 720,
-        "wires": [
-            [
-                "c9dec2120ae07a37"
-            ]
-        ]
-    },
-    {
-        "id": "cb3c41295c15fdca",
-        "type": "debug",
-        "z": "f84a663b31f096d7",
-        "name": "debug 8",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 960,
-        "y": 720,
-        "wires": []
-    },
-    {
-        "id": "c9dec2120ae07a37",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Extract Thresholds",
-        "func": "const config = msg.payload;\n\n// Guardar a configuração ativa completa\n// no contexto global do Node-RED\nglobal.set(\"dashboardConfig\", config);\n\n// Manter a informação no payload para conseguirmos\n// confirmar no Debug que foi guardada\nmsg.payload = {\n    status: \"Configuração guardada\",\n    scenario: config.scenario.id,\n    name: config.scenario.name\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 570,
-        "y": 720,
-        "wires": [
-            [
-                "c891b1500cf19c67"
-            ]
-        ]
-    },
-    {
-        "id": "c891b1500cf19c67",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Read Global Config",
-        "func": "const config = global.get(\"dashboardConfig\");\n\nif (!config) {\n    node.error(\"Configuração global não encontrada\");\n    return null;\n}\n\nmsg.payload = {\n    scenario: config.scenario.id,\n    temperaturaMin:\n        config.zones[0].sensors[0].metrics\n            .find(m => m.field === \"temperatura\")\n            .alerts.min,\n\n    temperaturaMax:\n        config.zones[0].sensors[0].metrics\n            .find(m => m.field === \"temperatura\")\n            .alerts.max\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 790,
-        "y": 720,
-        "wires": [
-            [
-                "cb3c41295c15fdca"
-            ]
-        ]
-    },
-    {
-        "id": "87cd0835088ccc41",
-        "type": "inject",
-        "z": "f84a663b31f096d7",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 120,
-        "y": 800,
-        "wires": [
-            [
-                "04b6302fe78e607e"
-            ]
-        ]
-    },
-    {
-        "id": "04b6302fe78e607e",
-        "type": "function",
-        "z": "f84a663b31f096d7",
-        "name": "Clear Sensor001 History",
-        "func": "context.set(\"history\", []);\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 370,
-        "y": 800,
-        "wires": [
-            []
-        ]
-    }
+  {
+    "id": "f84a663b31f096d7",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "3f93e0e0fa0e28c2",
+    "type": "mqtt-broker",
+    "name": "",
+    "broker": "mosquitto",
+    "port": 1883,
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": 4,
+    "keepalive": 60,
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthRetain": "false",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closeRetain": "false",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willRetain": "false",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "61332c29592423f3",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 150,
+    "y": 60,
+    "wires": [
+      [
+        "4493eb6083274842"
+      ]
+    ]
+  },
+  {
+    "id": "4493eb6083274842",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Sensor Sim",
+    "func": "msg.payload = {\n    sensor_id: \"sensor_001\",\n    tipo: \"ambiental\",\n    temperatura: Math.floor(Math.random() * 15) + 20,\n    humidade: Math.floor(Math.random() * 40) + 40,\n    timestamp: new Date().toISOString()\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 330,
+    "y": 60,
+    "wires": [
+      [
+        "35de72637bc56782",
+        "96e95458d702a2a3"
+      ]
+    ]
+  },
+  {
+    "id": "dbe94f5134464cf1",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "topic": "sensors/ambiental/001",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 960,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "35de72637bc56782",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 1",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 540,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "96e95458d702a2a3",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Analysis Engine",
+    "func": "let data = msg.payload;\n\n// Converter valores para número\nconst temperatura = Number(data.temperatura);\nconst humidade = Number(data.humidade);\n\n// -------------------------------------------------\n// CONFIGURAÇÃO ATIVA\n// -------------------------------------------------\n\nconst config = global.get(\"dashboardConfig\");\n\nif (!config) {\n    node.error(\"Configuração ativa não encontrada\", msg);\n    return null;\n}\n\n// Procurar o sensor_001 em todas as zonas\nlet sensorConfig = null;\n\nfor (const zone of config.zones) {\n    const sensor = zone.sensors.find(\n        s => s.id === \"sensor_001\"\n    );\n\n    if (sensor) {\n        sensorConfig = sensor;\n        break;\n    }\n}\n\nif (!sensorConfig) {\n    node.error(\n        \"sensor_001 não encontrado na configuração ativa\",\n        msg\n    );\n    return null;\n}\n\n// Procurar configuração das métricas\nconst tempConfig = sensorConfig.metrics.find(\n    metric => metric.field === \"temperatura\"\n);\n\nconst humConfig = sensorConfig.metrics.find(\n    metric => metric.field === \"humidade\"\n);\n\nif (!tempConfig || !humConfig) {\n    node.error(\n        \"Configuração de temperatura ou humidade não encontrada\",\n        msg\n    );\n    return null;\n}\n\n// Limites provenientes do cenário ativo\nconst tempMin = Number(tempConfig.alerts.min);\nconst tempMax = Number(tempConfig.alerts.max);\n\nconst humMin = Number(humConfig.alerts.min);\nconst humMax = Number(humConfig.alerts.max);\n\n// -------------------------------------------------\n// HISTÓRICO\n// -------------------------------------------------\n\nlet history = context.get(\"history\") || [];\n\nhistory.push({\n    temperatura: temperatura,\n    humidade: humidade,\n    timestamp: data.timestamp\n});\n\nif (history.length > 5) {\n    history = history.slice(-5);\n}\n\ncontext.set(\"history\", history);\n\n// Função para calcular média\nfunction average(values) {\n    if (values.length === 0) {\n        return 0;\n    }\n\n    const total = values.reduce(\n        (sum, value) => sum + Number(value),\n        0\n    );\n\n    return total / values.length;\n}\n\n// Médias móveis\nconst tempAvg = average(\n    history.map(item => item.temperatura)\n);\n\nconst humAvg = average(\n    history.map(item => item.humidade)\n);\n\n// -------------------------------------------------\n// THRESHOLDS DINÂMICOS\n// -------------------------------------------------\n\nlet alerts = [];\n\nif (temperatura < tempMin) {\n    alerts.push(\"Temperatura abaixo do limite\");\n}\n\nif (temperatura > tempMax) {\n    alerts.push(\"Temperatura acima do limite\");\n}\n\nif (humidade < humMin) {\n    alerts.push(\"Humidade abaixo do limite\");\n}\n\nif (humidade > humMax) {\n    alerts.push(\"Humidade acima do limite\");\n}\n\n// -------------------------------------------------\n// DETEÇÃO DE TENDÊNCIA\n// -------------------------------------------------\n\nlet tempTrend = \"estável\";\nlet humTrend = \"estável\";\n\nif (history.length >= 3) {\n\n    const firstReading = history[0];\n    const lastReading = history[history.length - 1];\n\n    const tempDifference =\n        lastReading.temperatura - firstReading.temperatura;\n\n    const humDifference =\n        lastReading.humidade - firstReading.humidade;\n\n    // Tendência da temperatura\n    if (tempDifference >= 5) {\n        tempTrend = \"subida rápida\";\n    } else if (tempDifference >= 2) {\n        tempTrend = \"subida gradual\";\n    } else if (tempDifference <= -5) {\n        tempTrend = \"descida rápida\";\n    } else if (tempDifference <= -2) {\n        tempTrend = \"descida gradual\";\n    } else {\n        tempTrend = \"estável\";\n    }\n\n    // Tendência da humidade\n    if (humDifference >= 10) {\n        humTrend = \"subida rápida\";\n    } else if (humDifference >= 4) {\n        humTrend = \"subida gradual\";\n    } else if (humDifference <= -10) {\n        humTrend = \"descida rápida\";\n    } else if (humDifference <= -4) {\n        humTrend = \"descida gradual\";\n    } else {\n        humTrend = \"estável\";\n    }\n}\n\n// -------------------------------------------------\n// DETEÇÃO DE ANOMALIAS\n// -------------------------------------------------\n\nlet anomaly = false;\n\nif (Math.abs(temperatura - tempAvg) > 6) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: variação brusca de temperatura\"\n    );\n}\n\nif (Math.abs(humidade - humAvg) > 15) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: variação brusca de humidade\"\n    );\n}\n\n// -------------------------------------------------\n// ESTADO GERAL\n// -------------------------------------------------\n\nlet estado = \"normal\";\n\nif (alerts.length > 0) {\n    estado = \"aviso\";\n}\n\nif (anomaly) {\n    estado = \"alerta\";\n}\n\n// -------------------------------------------------\n// RESULTADO DA ANÁLISE\n// -------------------------------------------------\n\nmsg.payload = {\n    ...data,\n\n    temperatura: temperatura,\n    humidade: humidade,\n\n    analytics: {\n        temperatura_media_movel:\n            Number(tempAvg.toFixed(2)),\n\n        humidade_media_movel:\n            Number(humAvg.toFixed(2)),\n\n        tendencia_temperatura:\n            tempTrend,\n\n        tendencia_humidade:\n            humTrend,\n\n        estado:\n            estado,\n\n        anomalia:\n            anomaly,\n\n        alertas:\n            alerts,\n\n        limites: {\n            temperatura: {\n                min: tempMin,\n                max: tempMax\n            },\n\n            humidade: {\n                min: humMin,\n                max: humMax\n            }\n        },\n\n        scenario:\n            config.scenario.id\n    }\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 580,
+    "y": 60,
+    "wires": [
+      [
+        "dbe94f5134464cf1",
+        "36860a36478a321c",
+        "d63f3f1aa01c5b8d"
+      ]
+    ]
+  },
+  {
+    "id": "36860a36478a321c",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 2",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 820,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "21caeb6c7c5ec864",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 150,
+    "y": 280,
+    "wires": [
+      [
+        "6f49577626e02778"
+      ]
+    ]
+  },
+  {
+    "id": "6f49577626e02778",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Luminosity Simulator",
+    "func": "msg.payload = {\n    sensor_id: \"sensor_002\",\n    tipo: \"luminosidade\",\n    luminosidade: Math.floor(Math.random() * 1000),\n    timestamp: new Date().toISOString()\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 360,
+    "y": 280,
+    "wires": [
+      [
+        "01dd637c639f53a1",
+        "af116b5785b33ce6",
+        "d63f3f1aa01c5b8d"
+      ]
+    ]
+  },
+  {
+    "id": "d6dd36af8a1dee62",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "topic": "sensors/luminosidade/002",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 850,
+    "y": 280,
+    "wires": []
+  },
+  {
+    "id": "01dd637c639f53a1",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 3",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 600,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "af116b5785b33ce6",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Analysis Engine",
+    "func": "let data = msg.payload;\n\n// Converter luminosidade para número\nconst luminosidade = Number(data.luminosidade);\n\n// -------------------------------------------------\n// CONFIGURAÇÃO ATIVA\n// -------------------------------------------------\n\nconst config = global.get(\"dashboardConfig\");\n\nif (!config) {\n    node.error(\"Configuração ativa não encontrada\", msg);\n    return null;\n}\n\n// Procurar o sensor_002 em todas as zonas\nlet sensorConfig = null;\n\nfor (const zone of config.zones) {\n    const sensor = zone.sensors.find(\n        s => s.id === \"sensor_002\"\n    );\n\n    if (sensor) {\n        sensorConfig = sensor;\n        break;\n    }\n}\n\nif (!sensorConfig) {\n    node.error(\n        \"sensor_002 não encontrado na configuração ativa\",\n        msg\n    );\n    return null;\n}\n\n// Procurar configuração da luminosidade\nconst luminosityConfig = sensorConfig.metrics.find(\n    metric => metric.field === \"luminosidade\"\n);\n\nif (!luminosityConfig) {\n    node.error(\n        \"Configuração de luminosidade não encontrada\",\n        msg\n    );\n    return null;\n}\n\n// Limites provenientes do cenário ativo\nconst luminosityMin =\n    Number(luminosityConfig.alerts.min);\n\nconst luminosityMax =\n    Number(luminosityConfig.alerts.max);\n\n// -------------------------------------------------\n// HISTÓRICO\n// -------------------------------------------------\n\nlet history =\n    context.get(\"history_luminosidade\") || [];\n\nhistory.push({\n    luminosidade: luminosidade,\n    timestamp: data.timestamp\n});\n\nif (history.length > 5) {\n    history = history.slice(-5);\n}\n\ncontext.set(\"history_luminosidade\", history);\n\n// Função para calcular média\nfunction average(values) {\n    if (values.length === 0) {\n        return 0;\n    }\n\n    const total = values.reduce(\n        (sum, value) => sum + Number(value),\n        0\n    );\n\n    return total / values.length;\n}\n\n// Média móvel\nconst luminosityAvg = average(\n    history.map(item => item.luminosidade)\n);\n\n// -------------------------------------------------\n// THRESHOLDS DINÂMICOS\n// -------------------------------------------------\n\nlet alerts = [];\n\nif (luminosidade < luminosityMin) {\n    alerts.push(\"Luminosidade abaixo do limite\");\n}\n\nif (luminosidade > luminosityMax) {\n    alerts.push(\"Luminosidade acima do limite\");\n}\n\n// -------------------------------------------------\n// TENDÊNCIA\n// -------------------------------------------------\n\nlet trend = \"estável\";\n\nif (history.length >= 3) {\n\n    const firstValue =\n        history[0].luminosidade;\n\n    const lastValue =\n        history[history.length - 1].luminosidade;\n\n    const difference =\n        lastValue - firstValue;\n\n    if (difference >= 200) {\n        trend = \"subida rápida\";\n    } else if (difference >= 80) {\n        trend = \"subida gradual\";\n    } else if (difference <= -200) {\n        trend = \"descida rápida\";\n    } else if (difference <= -80) {\n        trend = \"descida gradual\";\n    }\n}\n\n// -------------------------------------------------\n// ANOMALIA\n// -------------------------------------------------\n\nlet anomaly = false;\n\nif (\n    Math.abs(\n        luminosidade - luminosityAvg\n    ) > 300\n) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: variação brusca de luminosidade\"\n    );\n}\n\n// -------------------------------------------------\n// ESTADO GERAL\n// -------------------------------------------------\n\nlet estado = \"normal\";\n\nif (alerts.length > 0) {\n    estado = \"aviso\";\n}\n\nif (anomaly) {\n    estado = \"alerta\";\n}\n\n// -------------------------------------------------\n// RESULTADO\n// -------------------------------------------------\n\nmsg.payload = {\n    ...data,\n\n    luminosidade: luminosidade,\n\n    analytics: {\n        luminosidade_media_movel:\n            Number(luminosityAvg.toFixed(2)),\n\n        tendencia_luminosidade:\n            trend,\n\n        estado:\n            estado,\n\n        anomalia:\n            anomaly,\n\n        alertas:\n            alerts,\n\n        limites: {\n            luminosidade: {\n                min: luminosityMin,\n                max: luminosityMax\n            }\n        },\n\n        scenario:\n            config.scenario.id\n    }\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 600,
+    "y": 280,
+    "wires": [
+      [
+        "d6dd36af8a1dee62",
+        "9843fe47381b41a0"
+      ]
+    ]
+  },
+  {
+    "id": "9843fe47381b41a0",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 4",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 820,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "7bfd4ba147d31f75",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 110,
+    "y": 500,
+    "wires": [
+      [
+        "0c0704b414373e6e"
+      ]
+    ]
+  },
+  {
+    "id": "0c0704b414373e6e",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Motion Simulator",
+    "func": "msg.payload = {\n    sensor_id: \"sensor_003\",\n    tipo: \"movimento\",\n    movimento: Math.random() > 0.7,\n    timestamp: new Date().toISOString()\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 340,
+    "y": 500,
+    "wires": [
+      [
+        "c871552ed3fd0ecc",
+        "f84921e240d5f603",
+        "d63f3f1aa01c5b8d"
+      ]
+    ]
+  },
+  {
+    "id": "8810da10ae1fc16b",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "topic": "sensors/movimento/003",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 850,
+    "y": 500,
+    "wires": []
+  },
+  {
+    "id": "c871552ed3fd0ecc",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 5",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 580,
+    "y": 600,
+    "wires": []
+  },
+  {
+    "id": "f84921e240d5f603",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Analysis Engine",
+    "func": "let data = msg.payload;\n\n// Converter movimento para booleano\nconst movimento =\n    data.movimento === true ||\n    data.movimento === \"true\" ||\n    data.movimento === 1;\n\n// Histórico específico do sensor de movimento\nlet history = context.get(\"history_movimento\") || [];\n\n// Adicionar nova leitura\nhistory.push({\n    movimento: movimento,\n    timestamp: data.timestamp\n});\n\n// Manter apenas as últimas 10 leituras\nif (history.length > 10) {\n    history = history.slice(-10);\n}\n\ncontext.set(\"history_movimento\", history);\n\n// -------------------------------------------------\n// CONTAGEM DE MOVIMENTO\n// -------------------------------------------------\n\nconst motionCount = history.filter(\n    item => item.movimento === true\n).length;\n\n// -------------------------------------------------\n// ESTADO DE ATIVIDADE\n// -------------------------------------------------\n\nlet atividade = \"sem movimento\";\n\nif (movimento) {\n    atividade = \"movimento detetado\";\n}\n\nif (motionCount >= 7) {\n    atividade = \"atividade elevada\";\n}\n\n// -------------------------------------------------\n// ALERTAS\n// -------------------------------------------------\n\nlet alerts = [];\n\nif (motionCount >= 7) {\n    alerts.push(\n        \"Atividade elevada: movimento detetado frequentemente\"\n    );\n}\n\n// -------------------------------------------------\n// ANOMALIA\n// -------------------------------------------------\n\nlet anomaly = false;\n\n// Considerar anómala uma atividade muito frequente\n// nas últimas 10 leituras\nif (motionCount >= 9) {\n    anomaly = true;\n\n    alerts.push(\n        \"Anomalia: movimento persistente\"\n    );\n}\n\n// -------------------------------------------------\n// ESTADO GERAL\n// -------------------------------------------------\n\nlet estado = \"normal\";\n\nif (alerts.length > 0) {\n    estado = \"aviso\";\n}\n\nif (anomaly) {\n    estado = \"alerta\";\n}\n\n// -------------------------------------------------\n// RESULTADO\n// -------------------------------------------------\n\nmsg.payload = {\n    ...data,\n\n    movimento: movimento,\n\n    analytics: {\n        atividade_movimento:\n            atividade,\n\n        movimentos_recentes:\n            motionCount,\n\n        estado:\n            estado,\n\n        anomalia:\n            anomaly,\n\n        alertas:\n            alerts\n    }\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 580,
+    "y": 500,
+    "wires": [
+      [
+        "8810da10ae1fc16b",
+        "2b734806788152f8"
+      ]
+    ]
+  },
+  {
+    "id": "2b734806788152f8",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 6",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 820,
+    "y": 600,
+    "wires": []
+  },
+  {
+    "id": "cb8a504a731c5181",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "FIWARE Formatter Sensor001",
+    "func": "msg.method = \"PATCH\";\nmsg.url = \"http://orion:1026/v2/entities/Sensor001/attrs\";\n\nmsg.headers = {\n    \"Content-Type\": \"application/json\"\n};\n\nmsg.payload = {\n    temperature: {\n        value: msg.payload.temperatura,\n        type: \"Number\"\n    },\n    humidity: {\n        value: msg.payload.humidade,\n        type: \"Number\"\n    },\n    anomaly: {\n        value: msg.payload.analytics?.anomalia || false,\n        type: \"Boolean\"\n    },\n    trend: {\n        value: msg.payload.analytics?.tendencia || \"estável\",\n        type: \"Text\"\n    }\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1330,
+    "y": 100,
+    "wires": [
+      [
+        "786777e23b7c3ab9"
+      ]
+    ]
+  },
+  {
+    "id": "786777e23b7c3ab9",
+    "type": "http request",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 1590,
+    "y": 100,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "d63f3f1aa01c5b8d",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "FIWARE Formatter Universal",
+    "func": "const data = msg.payload;\n\nlet entityId = null;\nlet payload = {};\n\nif (data.sensor_id === \"sensor_001\") {\n    entityId = \"Sensor001\";\n\n    payload = {\n        temperature: {\n            value: data.temperatura,\n            type: \"Number\"\n        },\n        humidity: {\n            value: data.humidade,\n            type: \"Number\"\n        },\n        anomaly: {\n            value: data.analytics?.anomalia || false,\n            type: \"Boolean\"\n        },\n        trend: {\n            value: data.analytics?.tendencia || \"estável\",\n            type: \"Text\"\n        }\n    };\n}\n\nif (data.sensor_id === \"sensor_002\") {\n    entityId = \"Sensor002\";\n\n    payload = {\n        luminosity: {\n            value: data.luminosidade,\n            type: \"Number\"\n        }\n    };\n}\n\nif (data.sensor_id === \"sensor_003\") {\n    entityId = \"Sensor003\";\n\n    payload = {\n        motion: {\n            value: data.movimento,\n            type: \"Boolean\"\n        }\n    };\n}\n\nif (!entityId) {\n    node.warn(\"Sensor desconhecido: \" + data.sensor_id);\n    return null;\n}\n\nmsg.method = \"PATCH\";\nmsg.url = `http://orion:1026/v2/entities/${entityId}/attrs`;\nmsg.headers = {\n    \"Content-Type\": \"application/json\"\n};\nmsg.payload = payload;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1260,
+    "y": 340,
+    "wires": [
+      [
+        "2f36d79952079ce9"
+      ]
+    ]
+  },
+  {
+    "id": "2f36d79952079ce9",
+    "type": "http request",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 1530,
+    "y": 340,
+    "wires": [
+      [
+        "fbfb68515064ef51"
+      ]
+    ]
+  },
+  {
+    "id": "fbfb68515064ef51",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 7",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1720,
+    "y": 340,
+    "wires": []
+  },
+  {
+    "id": "d87542320e551d02",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "5",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 130,
+    "y": 720,
+    "wires": [
+      [
+        "cd48af8b9eb89916"
+      ]
+    ]
+  },
+  {
+    "id": "cd48af8b9eb89916",
+    "type": "http request",
+    "z": "f84a663b31f096d7",
+    "name": "Get Active Config",
+    "method": "GET",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://backend:3000/dashboard-config",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 330,
+    "y": 720,
+    "wires": [
+      [
+        "c9dec2120ae07a37"
+      ]
+    ]
+  },
+  {
+    "id": "cb3c41295c15fdca",
+    "type": "debug",
+    "z": "f84a663b31f096d7",
+    "name": "debug 8",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 960,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "c9dec2120ae07a37",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Extract Thresholds",
+    "func": "const config = msg.payload;\n\n// Guardar a configuração ativa completa\n// no contexto global do Node-RED\nglobal.set(\"dashboardConfig\", config);\n\n// Manter a informação no payload para conseguirmos\n// confirmar no Debug que foi guardada\nmsg.payload = {\n    status: \"Configuração guardada\",\n    scenario: config.scenario.id,\n    name: config.scenario.name\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 570,
+    "y": 720,
+    "wires": [
+      [
+        "c891b1500cf19c67"
+      ]
+    ]
+  },
+  {
+    "id": "c891b1500cf19c67",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Read Global Config",
+    "func": "const config = global.get(\"dashboardConfig\");\n\nif (!config) {\n    node.error(\"Configuração global não encontrada\");\n    return null;\n}\n\nmsg.payload = {\n    scenario: config.scenario.id,\n    temperaturaMin:\n        config.zones[0].sensors[0].metrics\n            .find(m => m.field === \"temperatura\")\n            .alerts.min,\n\n    temperaturaMax:\n        config.zones[0].sensors[0].metrics\n            .find(m => m.field === \"temperatura\")\n            .alerts.max\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 790,
+    "y": 720,
+    "wires": [
+      [
+        "cb3c41295c15fdca"
+      ]
+    ]
+  },
+  {
+    "id": "87cd0835088ccc41",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 120,
+    "y": 800,
+    "wires": [
+      [
+        "04b6302fe78e607e"
+      ]
+    ]
+  },
+  {
+    "id": "04b6302fe78e607e",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Clear Sensor001 History",
+    "func": "context.set(\"history\", []);\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 370,
+    "y": 800,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "bb0bf1c36ed44bcf",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Gerar Humidade Solo Simulator",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 760,
+    "wires": [
+      [
+        "12062d47883446bd"
+      ]
+    ]
+  },
+  {
+    "id": "12062d47883446bd",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Humidade Solo Simulator",
+    "func": "msg.payload = {\n    sensor_id: \"sensor_004\",\n    tipo: \"agricultura\",\n    humidade_solo: Math.floor(Math.random() * 61) + 20,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 760,
+    "wires": [
+      [
+        "7dfcf18932e342ad"
+      ]
+    ]
+  },
+  {
+    "id": "7dfcf18932e342ad",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Humidade Solo Simulator",
+    "topic": "sensors/agricultura/004",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 720,
+    "y": 760,
+    "wires": []
+  },
+  {
+    "id": "c92b746d8972427b",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Gerar Consumo Agua Simulator",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 775,
+    "wires": [
+      [
+        "fe1d970e26a147cd"
+      ]
+    ]
+  },
+  {
+    "id": "fe1d970e26a147cd",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Consumo Agua Simulator",
+    "func": "let total = context.get(\"total\") ?? 125;\ntotal += Math.round((Math.random() * 2 + 0.2) * 100) / 100;\ncontext.set(\"total\", total);\nmsg.payload = {\n    sensor_id: \"sensor_005\",\n    tipo: \"domotica\",\n    consumo_agua: Math.round(total * 100) / 100,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 775,
+    "wires": [
+      [
+        "568db03793d6483a"
+      ]
+    ]
+  },
+  {
+    "id": "568db03793d6483a",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Consumo Agua Simulator",
+    "topic": "sensors/domotica/005",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 720,
+    "y": 775,
+    "wires": []
+  },
+  {
+    "id": "5e3191bc97c54f4e",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Gerar Consumo Energetico Simulator",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 790,
+    "wires": [
+      [
+        "5c400726ede9496a"
+      ]
+    ]
+  },
+  {
+    "id": "5c400726ede9496a",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Consumo Energetico Simulator",
+    "func": "let total = context.get(\"total\") ?? 250;\ntotal += Math.round((Math.random() * 0.3 + 0.02) * 1000) / 1000;\ncontext.set(\"total\", total);\nmsg.payload = {\n    sensor_id: \"sensor_006\",\n    tipo: \"industrial\",\n    consumo_energetico: Math.round(total * 1000) / 1000,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 790,
+    "wires": [
+      [
+        "6a991a24db0e4ebd"
+      ]
+    ]
+  },
+  {
+    "id": "6a991a24db0e4ebd",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Consumo Energetico Simulator",
+    "topic": "sensors/industrial/006",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 720,
+    "y": 790,
+    "wires": []
+  }
 ]

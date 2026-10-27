@@ -1,11 +1,21 @@
 import os
 
 import numpy as np
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from influxdb_client import InfluxDBClient
 from sklearn.ensemble import IsolationForest
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
+from generic_analysis import (
+    load_scenario,
+    find_metric,
+    prepare_values,
+    calculate_trend,
+    detect_anomaly,
+    evaluate_limits,
+    explain_trend,
+    analyze_boolean
+)
 
 app = Flask(__name__)
 
@@ -21,7 +31,7 @@ SENSOR_MAP = {
 }
 
 
-def get_sensor_data(sensor_id, metric):
+def get_sensor_data(sensor_id, metric, window_size=20):
     client = InfluxDBClient(
         url=INFLUX_URL,
         token=INFLUX_TOKEN,
@@ -34,7 +44,7 @@ def get_sensor_data(sensor_id, metric):
       |> filter(fn: (r) => r._measurement == "sensor_readings")
       |> filter(fn: (r) => r.sensor_id == "{sensor_id}")
       |> filter(fn: (r) => r._field == "{metric}")
-      |> tail(n: 20)
+      |> tail(n: {window_size})
     '''
 
     tables = client.query_api().query(query)
@@ -116,14 +126,43 @@ def luminosity():
 def zscore(metric):
     try:
 
-        if metric not in SENSOR_MAP:
+        scenario = request.args.get("scenario")
+        sensor_id = request.args.get("sensor_id")
+
+        if scenario and sensor_id:
+            scenario_config = load_scenario(scenario)
+            metric_config = find_metric(
+                scenario_config, sensor_id, metric
+            )
+
+            if metric_config["data_type"] == "boolean":
+                return jsonify({
+                    "error": "Esta análise requer uma métrica numérica"
+                }), 400
+        elif not scenario and not sensor_id and metric in SENSOR_MAP:
+            sensor_id = SENSOR_MAP[metric]
+        else:
             return jsonify({
-                "error": "Métrica inválida"
+                "error": "Indique um cenário e sensor válidos"
             }), 400
 
-        sensor_id = SENSOR_MAP[metric]
-
         values = get_sensor_data(sensor_id, metric)
+        values = sorted(values, key=lambda item: item["time"])
+
+        if scenario and sensor_id:
+            measurement_type = metric_config["measurement_type"]
+            if measurement_type == "acumulado":
+                increments = []
+                for previous, current in zip(values, values[1:]):
+                    difference = current["value"] - previous["value"]
+                    if difference < 0:
+                        increments = []
+                        continue
+                    increments.append({
+                        "time": current["time"],
+                        "value": round(difference, 6)
+                    })
+                values = increments
 
         if len(values) < 2:
             return jsonify({
@@ -172,14 +211,43 @@ def zscore(metric):
 @app.route("/isolation-forest/<metric>", methods=["GET"])
 def isolation_forest(metric):
     try:
-        if metric not in SENSOR_MAP:
+        scenario = request.args.get("scenario")
+        sensor_id = request.args.get("sensor_id")
+
+        if scenario and sensor_id:
+            scenario_config = load_scenario(scenario)
+            metric_config = find_metric(
+                scenario_config, sensor_id, metric
+            )
+
+            if metric_config["data_type"] == "boolean":
+                return jsonify({
+                    "error": "Esta análise requer uma métrica numérica"
+                }), 400
+        elif not scenario and not sensor_id and metric in SENSOR_MAP:
+            sensor_id = SENSOR_MAP[metric]
+        else:
             return jsonify({
-                "error": "Métrica inválida"
+                "error": "Indique um cenário e sensor válidos"
             }), 400
 
-        sensor_id = SENSOR_MAP[metric]
-
         values = get_sensor_data(sensor_id, metric)
+        values = sorted(values, key=lambda item: item["time"])
+
+        if scenario and sensor_id:
+            measurement_type = metric_config["measurement_type"]
+            if measurement_type == "acumulado":
+                increments = []
+                for previous, current in zip(values, values[1:]):
+                    difference = current["value"] - previous["value"]
+                    if difference < 0:
+                        increments = []
+                        continue
+                    increments.append({
+                        "time": current["time"],
+                        "value": round(difference, 6)
+                    })
+                values = increments
 
         if len(values) < 5:
             return jsonify({
@@ -278,6 +346,148 @@ def forecast():
         return jsonify({
             "error": str(error)
         }), 500
+
+@app.route("/analysis", methods=["GET"])
+def generic_analysis():
+    try:
+        scenario = request.args.get("scenario")
+        sensor_id = request.args.get("sensor_id")
+        metric_name = request.args.get("metric")
+
+        if not sensor_id or not metric_name:
+            return jsonify({
+                "error": "sensor_id e metric são obrigatórios"
+            }), 400
+
+        scenario_config = load_scenario(scenario)
+
+        metric = find_metric(
+            scenario_config,
+            sensor_id,
+            metric_name
+        )
+
+
+        analysis_config = metric["analysis"]
+
+        if analysis_config.get("enabled", True) is False:
+            return jsonify({
+                "scenario": scenario_config["scenario"]["id"],
+                "sensor_id": sensor_id,
+                "metric": metric_name,
+                "status": "analysis_disabled",
+                "message": "A análise está desativada para esta métrica."
+            }), 200
+
+        window_size = int(analysis_config.get("window_size", 20))
+
+        if not 5 <= window_size <= 1000:
+            raise ValueError("window_size deve estar entre 5 e 1000")
+
+        readings = get_sensor_data(
+            sensor_id,
+            metric_name,
+            window_size=window_size
+        )
+
+        readings = sorted(readings, key=lambda item: item["time"])
+
+        if metric["data_type"] == "boolean":
+            boolean_window = 10
+
+            if len(readings) < boolean_window:
+                return jsonify({
+                    "scenario": scenario_config["scenario"]["id"],
+                    "sensor_id": sensor_id,
+                    "metric": metric_name,
+                    "status": "dados_insuficientes",
+                    "count": len(readings),
+                    "required_count": boolean_window
+                }), 200
+
+            result = analyze_boolean(
+                readings,
+                metric["alerts"],
+                window_size=boolean_window
+            )
+
+            return jsonify({
+                "scenario": scenario_config["scenario"]["id"],
+                "sensor_id": sensor_id,
+                "metric": metric_name,
+                "label": metric["label"],
+                "data_type": "boolean",
+                "analysis_basis": "frequencia_deteccoes",
+                "activity": result
+            }), 200
+
+        if not readings:
+            return jsonify({
+                "sensor_id": sensor_id,
+                "metric": metric_name,
+                "status": "dados_insuficientes",
+                "count": 0
+            })
+
+        measurement_type = metric["measurement_type"]
+        values = prepare_values(readings, measurement_type)
+
+
+        trend_config = analysis_config.get("trend", {})
+        anomaly_config = analysis_config.get("anomaly", {})
+
+        gradual = float(trend_config.get("gradual_change", 2.0))
+        rapid = float(trend_config.get("rapid_change", 5.0))
+
+        threshold = float(anomaly_config.get("threshold", 2.0))
+        tolerance = float(anomaly_config.get("tolerance", 0.0))
+
+        trend = calculate_trend(values, gradual, rapid)
+
+        anomaly = detect_anomaly(
+            values,
+            threshold=threshold,
+            tolerance=tolerance
+        )
+
+        current_value = float(readings[-1]["value"])
+
+        limits = evaluate_limits(
+            current_value,
+            metric["alerts"],
+            metric["unit"]
+        )
+
+        return jsonify({
+            "scenario": scenario_config["scenario"]["id"],
+            "sensor_id": sensor_id,
+            "metric": metric_name,
+            "label": metric["label"],
+            "unit": metric["unit"],
+            "measurement_type": measurement_type,
+            "count": len(readings),
+            "current_value": current_value,
+            "analysis_value": values[-1] if values else None,
+            "analysis_basis": (
+                "incremento_por_intervalo"
+                if measurement_type == "acumulado"
+                else "valor_instantaneo"
+            ),
+            "limits": limits,
+            "trend": trend,
+            "trend_explanation": explain_trend(
+                trend,
+                metric["unit"],
+                measurement_type
+            ),
+            "anomaly": anomaly
+        })
+
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
