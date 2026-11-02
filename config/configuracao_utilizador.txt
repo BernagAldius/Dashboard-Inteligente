@@ -27,3 +27,19 @@ metrica_humidade_solo_sensor=sensor_004
 metrica_humidade_solo_min=20
 metrica_humidade_solo_max=80
 metrica_humidade_solo_grafico=barra
+
+
+# ==========================================
+# FONTES DE DADOS REST
+# ==========================================
+
+fonte_rest_exemplo=true
+fonte_rest_exemplo_nome=Fonte REST Exemplo
+fonte_rest_exemplo_url=https://api.open-meteo.com/v1/forecast?latitude=38.57&longitude=-7.91&current=temperature_2m
+fonte_rest_exemplo_intervalo=300
+fonte_rest_exemplo_sensor=sensor_rest_001
+fonte_rest_exemplo_metrica=temperatura_externa
+fonte_rest_exemplo_campo_json=current.temperature_2m
+fonte_rest_exemplo_unidade=°C
+fonte_rest_exemplo_min=0
+fonte_rest_exemplo_max=40

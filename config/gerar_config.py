@@ -295,6 +295,201 @@ def aplicar_novas_metricas(dados, novas_metricas):
 
         print(f"Métrica '{identificador}' configurada com sucesso.")
 
+
+def validar_fontes_rest(configuracao):
+    from urllib.parse import urlsplit
+    import ipaddress
+
+    campos = {
+        "nome", "url", "intervalo", "sensor",
+        "metrica", "campo_json", "unidade",
+        "min", "max"
+    }
+    fontes = {}
+
+    for chave, valor in configuracao.items():
+        if not chave.startswith("fonte_"):
+            continue
+
+        restante = chave[len("fonte_"):]
+        identificador = restante
+        campo = "ativo"
+
+        for candidato in sorted(campos, key=len, reverse=True):
+            if restante.endswith("_" + candidato):
+                identificador = restante[:-(len(candidato) + 1)]
+                campo = candidato
+                break
+
+        if not identificador:
+            raise ValueError(f"Fonte REST inválida: {chave}")
+
+        fontes.setdefault(identificador, {})[campo] = valor
+
+    resultado = []
+
+    for identificador, dados in fontes.items():
+        obrigatorios = campos | {"ativo"}
+        em_falta = obrigatorios - dados.keys()
+
+        if em_falta:
+            raise ValueError(
+                f"Fonte '{identificador}': faltam "
+                f"{', '.join(sorted(em_falta))}"
+            )
+
+        if dados["ativo"].lower() not in {"true", "false"}:
+            raise ValueError(
+                f"Fonte '{identificador}': ativo deve ser true ou false"
+            )
+
+        try:
+            intervalo = int(dados["intervalo"])
+        except ValueError:
+            raise ValueError(
+                f"Fonte '{identificador}': intervalo inválido"
+            )
+
+        if intervalo < 30:
+            raise ValueError(
+                f"Fonte '{identificador}': intervalo mínimo de 30 segundos"
+            )
+
+        url = urlsplit(dados["url"])
+
+        if url.scheme not in {"http", "https"} or not url.hostname:
+            raise ValueError(
+                f"Fonte '{identificador}': URL HTTP/HTTPS inválida"
+            )
+
+        if url.username or url.password or url.fragment:
+            raise ValueError(
+                f"Fonte '{identificador}': URL não permitida"
+            )
+
+        # Nesta primeira versão, só aceitamos HTTPS público.
+        # Fontes da rede local exigirão autorização explícita.
+        if url.scheme != "https":
+            raise ValueError(
+                f"Fonte '{identificador}': utilize HTTPS nesta fase"
+            )
+
+        try:
+            endereco = ipaddress.ip_address(url.hostname)
+            if not endereco.is_global:
+                raise ValueError(
+                    f"Fonte '{identificador}': endereço privado não permitido"
+                )
+        except ValueError as erro:
+            if "não permitido" in str(erro):
+                raise
+
+        if not all(
+            dados[campo].strip()
+            for campo in {"nome", "sensor", "metrica", "campo_json"}
+        ):
+            raise ValueError(
+                f"Fonte '{identificador}': campos obrigatórios vazios"
+            )
+
+        try:
+            minimo = float(dados["min"])
+            maximo = float(dados["max"])
+        except (ValueError, TypeError):
+            raise ValueError(
+                f"Fonte '{identificador}': limites min/max inválidos"
+            )
+
+        import math
+
+        if not math.isfinite(minimo) or not math.isfinite(maximo):
+            raise ValueError(
+                f"Fonte '{identificador}': limites devem ser números finitos"
+            )
+
+        if minimo >= maximo:
+            raise ValueError(
+                f"Fonte '{identificador}': min deve ser inferior a max"
+            )
+
+        resultado.append({
+            "id": identificador,
+            "enabled": dados["ativo"].lower() == "true",
+            "name": dados["nome"],
+            "type": "rest",
+            "method": "GET",
+            "url": dados["url"],
+            "interval_seconds": intervalo,
+            "sensor_id": dados["sensor"],
+            "metric": dados["metrica"],
+            "json_path": dados["campo_json"],
+            "unit": dados["unidade"],
+            "min": minimo,
+            "max": maximo
+        })
+
+    return resultado
+
+def aplicar_fontes_rest(dados, fontes_rest):
+    if not dados.get("zones"):
+        raise ValueError("O cenário não contém zonas para registar sensores REST.")
+
+    for fonte in fontes_rest:
+        sensor_id = fonte["sensor_id"]
+        campo = fonte["metric"]
+
+        # Procurar o sensor em todas as zonas
+        sensor_encontrado = None
+
+        for zona in dados["zones"]:
+            for sensor in zona["sensors"]:
+                if sensor["id"] == sensor_id:
+                    sensor_encontrado = sensor
+                    break
+
+            if sensor_encontrado is not None:
+                break
+
+        # Criar o sensor caso não exista
+        if sensor_encontrado is None:
+            sensor_encontrado = {
+                "id": sensor_id,
+                "name": fonte["name"],
+                "type": "rest",
+                "metrics": []
+            }
+
+            dados["zones"][0]["sensors"].append(sensor_encontrado)
+
+        # Procurar a métrica para evitar duplicados
+        metrica_encontrada = None
+
+        for metrica in sensor_encontrado["metrics"]:
+            if metrica["field"] == campo:
+                metrica_encontrada = metrica
+                break
+
+        if metrica_encontrada is None:
+            metrica_encontrada = {}
+            sensor_encontrado["metrics"].append(metrica_encontrada)
+
+        # Atualizar os dados apresentados pelo Grafana
+        metrica_encontrada.update({
+            "field": campo,
+            "label": campo.replace("_", " ").title(),
+            "unit": fonte["unit"],
+            "data_type": "number",
+            "measurement_type": "instantaneo",
+            "chart_type": "linha",
+            "alerts": {
+                "min": fonte["min"],
+                "max": fonte["max"]
+            }
+        })
+
+        print(f"Sensor REST '{sensor_id}' / métrica '{campo}' configurado.")
+
+
 def atualizar_json(configuracao):
     cenario = configuracao["cenario"]
     json_file = CONFIG_DIR / f"{cenario}.json"
@@ -327,6 +522,34 @@ def atualizar_json(configuracao):
      # Aplicar novas métricas definidas no TXT
     novas_metricas = validar_novas_metricas(configuracao)
     aplicar_novas_metricas(dados, novas_metricas)
+
+    # Configurar fontes externas REST
+    fontes_anteriores = dados.get("data_sources", [])
+    dados["data_sources"] = validar_fontes_rest(configuracao)
+
+    # Remover sensores anteriormente geridos pelas fontes REST
+    ids_rest_anteriores = {
+        fonte["sensor_id"]
+        for fonte in fontes_anteriores
+        if fonte.get("sensor_id")
+    }
+
+    for zona in dados["zones"]:
+        zona["sensors"] = [
+            sensor
+            for sensor in zona["sensors"]
+            if not (
+                sensor.get("type") == "rest"
+                and sensor.get("id") in ids_rest_anteriores
+            )
+        ]
+
+    # Registar novamente os sensores REST a partir da configuração atual
+    aplicar_fontes_rest(dados, dados["data_sources"])
+
+    print(
+        f"{len(dados['data_sources'])} fonte(s) REST configurada(s)."
+    )
 
     print(f"Configuração preparada para '{json_file.name}'.")
 

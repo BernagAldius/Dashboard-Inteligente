@@ -77,6 +77,25 @@
               "chart_type": "barra"
             }
           ]
+        },
+        {
+          "id": "sensor_rest_001",
+          "name": "Fonte REST Exemplo",
+          "type": "rest",
+          "metrics": [
+            {
+              "field": "temperatura_externa",
+              "label": "Temperatura Externa",
+              "unit": "°C",
+              "data_type": "number",
+              "measurement_type": "instantaneo",
+              "chart_type": "linha",
+              "alerts": {
+                "min": 0.0,
+                "max": 40.0
+              }
+            }
+          ]
         }
       ]
     },
@@ -104,6 +123,23 @@
           ]
         }
       ]
+    }
+  ],
+  "data_sources": [
+    {
+      "id": "rest_exemplo",
+      "enabled": true,
+      "name": "Fonte REST Exemplo",
+      "type": "rest",
+      "method": "GET",
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=38.57&longitude=-7.91&current=temperature_2m",
+      "interval_seconds": 300,
+      "sensor_id": "sensor_rest_001",
+      "metric": "temperatura_externa",
+      "json_path": "current.temperature_2m",
+      "unit": "°C",
+      "min": 0.0,
+      "max": 40.0
     }
   ]
 }

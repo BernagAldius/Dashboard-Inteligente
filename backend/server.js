@@ -7,6 +7,7 @@ const http = require('http');
 const fs = require("fs");
 const path = require("path");
 const { Server } = require('socket.io');
+const { startRestSources } = require('./rest-sources');
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
 
@@ -82,6 +83,106 @@ function loadDashboardConfig() {
     }
 }
 
+// ======================================================
+// ARMAZENAMENTO COMUM DE DADOS (MQTT E REST)
+// ======================================================
+
+async function saveSensorData(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error('Dados do sensor inválidos');
+    }
+
+    if (typeof data.sensor_id !== 'string' || !data.sensor_id.trim()) {
+        throw new Error('sensor_id inválido');
+    }
+
+    if (typeof data.tipo !== 'string' || !data.tipo.trim()) {
+        throw new Error('tipo inválido');
+    }
+
+    const receivedDate = new Date(data.timestamp);
+    const validDate = Number.isNaN(receivedDate.getTime())
+        ? new Date()
+        : receivedDate;
+
+    data.timestamp = validDate.toISOString();
+
+    const point = new Point('sensor_readings')
+        .tag('sensor_id', data.sensor_id)
+        .tag('tipo', data.tipo)
+        .timestamp(validDate);
+
+    let fieldCount = 0;
+
+    Object.keys(data).forEach((key) => {
+        if (
+            key !== 'sensor_id' &&
+            key !== 'tipo' &&
+            key !== 'timestamp' &&
+            key !== 'analytics'
+        ) {
+            const value = data[key];
+
+            if (typeof value === 'number' && Number.isFinite(value)) {
+                point.floatField(key, value);
+                fieldCount++;
+            }
+
+            if (typeof value === 'boolean') {
+                point.booleanField(key, value);
+                fieldCount++;
+            }
+        }
+    });
+
+    if (data.analytics && typeof data.analytics === 'object') {
+        Object.keys(data.analytics).forEach((key) => {
+            const value = data.analytics[key];
+
+            if (typeof value === 'number' && Number.isFinite(value)) {
+                point.floatField(key, value);
+                fieldCount++;
+            }
+
+            if (typeof value === 'boolean') {
+                point.booleanField(key, value);
+                fieldCount++;
+            }
+
+            if (typeof value === 'string') {
+                point.stringField(key, value);
+                fieldCount++;
+            }
+
+            if (Array.isArray(value)) {
+                point.stringField(key, JSON.stringify(value));
+                fieldCount++;
+            }
+        });
+    }
+
+    if (fieldCount === 0) {
+        throw new Error('Leitura sem campos válidos para guardar');
+    }
+
+    writeApi.writePoint(point);
+    await writeApi.flush();
+
+    console.log('Data saved to InfluxDB:', data.sensor_id);
+
+    io.emit('sensor-data', {
+        time: data.timestamp,
+        ...data
+    });
+
+    console.log('Data sent to frontend via Socket.IO');
+}
+
+// ======================================================
+// INICIALIZACAO DAS FONTES REST
+// ======================================================
+
+startRestSources(saveSensorData);
 
 // ======================================================
 // MQTT
@@ -104,76 +205,9 @@ client.on('message', async (topic, message) => {
     try {
         const data = JSON.parse(message.toString());
 
-        // Utilizar o timestamp recebido ou a data atual, caso seja inválido
-        const receivedDate = new Date(data.timestamp);
-        const validDate = Number.isNaN(receivedDate.getTime())
-            ? new Date()
-            : receivedDate;
-
-        data.timestamp = validDate.toISOString();
-
         console.log('New Sensor Data:', data);
 
-        const point = new Point('sensor_readings')
-            .tag('sensor_id', data.sensor_id)
-            .tag('tipo', data.tipo)
-            .timestamp(validDate);
-
-        // Guardar campos numéricos dinamicamente
-        Object.keys(data).forEach((key) => {
-            if (
-                key !== 'sensor_id' &&
-                key !== 'tipo' &&
-                key !== 'timestamp' &&
-                key !== 'analytics'
-            ) {
-                const value = data[key];
-
-                if (typeof value === 'number') {
-                    point.floatField(key, value);
-                }
-
-                if (typeof value === 'boolean') {
-                    point.booleanField(key, value);
-                }
-            }
-        });
-
-        // Guardar analytics, se existirem
-        if (data.analytics) {
-            Object.keys(data.analytics).forEach((key) => {
-                const value = data.analytics[key];
-
-                if (typeof value === 'number') {
-                    point.floatField(key, value);
-                }
-
-                if (typeof value === 'boolean') {
-                    point.booleanField(key, value);
-                }
-
-                if (typeof value === 'string') {
-                    point.stringField(key, value);
-                }
-
-                if (Array.isArray(value)) {
-                    point.stringField(key, JSON.stringify(value));
-                }
-            });
-        }
-
-        writeApi.writePoint(point);
-
-        await writeApi.flush();
-
-        console.log('Data saved to InfluxDB');
-
-        io.emit('sensor-data', {
-  time: data.timestamp,
-  ...data
-});
-
-console.log('Data sent to frontend via Socket.io');
+        await saveSensorData(data);
 
     } catch (error) {
         console.error('Error processing MQTT message:', error.message);
