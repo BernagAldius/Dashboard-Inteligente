@@ -8,6 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { Server } = require('socket.io');
 const { startRestSources } = require('./rest-sources');
+const { syncSensorToFiware } = require('./fiware');
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
 
@@ -169,6 +170,17 @@ async function saveSensorData(data) {
     await writeApi.flush();
 
     console.log('Data saved to InfluxDB:', data.sensor_id);
+
+    try {
+        await syncSensorToFiware(data);
+        console.log('[FIWARE] Sensor sincronizado:', data.sensor_id);
+    } catch (error) {
+        console.error(
+            '[FIWARE] Erro ao sincronizar sensor:',
+            data.sensor_id,
+            error.message
+        );
+    }
 
     io.emit('sensor-data', {
         time: data.timestamp,
@@ -352,7 +364,53 @@ app.get('/sensor-data', async (req, res) => {
             }
         }
 
-        res.json(results);
+        const requestedScenario = req.query.scenario;
+
+        if (!requestedScenario) {
+            return res.json(results);
+        }
+
+        const allowedScenarios = ['agricultura', 'domotica', 'industrial'];
+
+        if (
+            typeof requestedScenario !== 'string' ||
+            !allowedScenarios.includes(requestedScenario)
+        ) {
+            return res.status(400).json({
+                error: 'Cenário inválido'
+            });
+        }
+
+        // Sensores REST associados ao cenário através da configuração.
+        const scenarioPath = path.join('/config', `${requestedScenario}.json`);
+        const scenarioConfig = JSON.parse(
+            fs.readFileSync(scenarioPath, 'utf8')
+        );
+
+        const restSensorIds = new Set(
+            (scenarioConfig.data_sources || [])
+                .filter(source => source.type === 'rest' && source.enabled)
+                .map(source => source.sensor_id)
+                .filter(Boolean)
+        );
+
+        const filteredResults = results.filter(registo => {
+            // Se a leitura declara o cenário, essa identificação prevalece.
+            if (registo.scenario) {
+                return registo.scenario === requestedScenario;
+            }
+
+            // Compatibilidade com sensores específicos já existentes.
+            if (registo.tipo === requestedScenario) {
+                return true;
+            }
+
+            // Fontes REST associadas explicitamente ao cenário.
+            return registo.tipo === 'rest' &&
+                restSensorIds.has(registo.sensor_id);
+        });
+
+        return res.json(filteredResults);
     } catch (error) {
         console.error(error);
 
