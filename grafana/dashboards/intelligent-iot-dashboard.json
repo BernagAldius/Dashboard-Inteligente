@@ -1455,7 +1455,7 @@
                                                    "kind":  "Panel",
                                                    "spec":  {
                                                                 "id":  23,
-                                                                "title":  "Análise Z-score – ${metric}",
+                                                                "title":  "Análise Z-score — ${metric}",
                                                                 "description":  "",
                                                                 "links":  [
 
@@ -1599,7 +1599,7 @@
                                                    "kind":  "Panel",
                                                    "spec":  {
                                                                 "id":  24,
-                                                                "title":  "Isolation Forest – ${metric}",
+                                                                "title":  "Isolation Forest — ${metric}",
                                                                 "description":  "",
                                                                 "links":  [
 
@@ -2462,7 +2462,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "A",
@@ -2480,7 +2480,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura_media_movel\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")\r\n  |\u003e sort(columns: [\"_time\"])\r\n  |\u003e movingAverage(n: 5)\r\n  |\u003e set(key: \"_field\", value: \"temperatura_media_movel\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "B",
@@ -2638,7 +2638,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "A",
@@ -2656,7 +2656,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade_media_movel\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")\r\n  |\u003e sort(columns: [\"_time\"])\r\n  |\u003e movingAverage(n: 5)\r\n  |\u003e set(key: \"_field\", value: \"humidade_media_movel\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "B",
@@ -2940,7 +2940,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"luminosidade\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"luminosidade\")\n  |\u003e filter(fn: (r) =\u003e (\"${scenario}\" == \"industrial\" and r[\"sensor_id\"] == \"ind_sensor_002\") or (\"${scenario}\" == \"domotica\" and r[\"sensor_id\"] == \"dom_sensor_002\") or (\"${scenario}\" == \"agricultura\" and r[\"sensor_id\"] == \"sensor_002\"))"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "A",
