@@ -21,3 +21,7 @@ datasources:
     uid: dfxo5beum0poga
     type: yesoreyeram-infinity-datasource
     access: proxy
+  - name: FIWARE Orion
+    uid: cg3i2mcul1uyoe
+    type: yesoreyeram-infinity-datasource
+    access: proxy

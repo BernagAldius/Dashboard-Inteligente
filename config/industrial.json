@@ -1,122 +1,122 @@
 {
-  "scenario": {
-    "id": "industrial",
-    "name": "Ambiente Industrial",
-    "description": "Monitorização inteligente de um ambiente industrial"
-  },
-  "dashboard": {
-    "charts": {
-      "temperatura": true,
-      "humidade": true,
-      "luminosidade": true,
-      "movimento": false,
-      "consumo_energetico": true
-    }
-  },
-  "zones": [
-    {
-      "id": "zona_producao",
-      "name": "Zona de Produção",
-      "sensors": [
-        {
-          "id": "sensor_001",
-          "name": "Sensor Ambiental",
-          "type": "ambiental",
-          "metrics": [
-            {
-              "field": "temperatura",
-              "label": "Temperatura",
-              "unit": "°C",
-              "alerts": {
-                "min": 10.0,
-                "max": 30.0
-              }
-            },
-            {
-              "field": "humidade",
-              "label": "Humidade",
-              "unit": "%",
-              "alerts": {
-                "min": 35.0,
-                "max": 75.0
-              }
-            }
-          ]
-        },
-        {
-          "id": "sensor_002",
-          "name": "Sensor de Luminosidade",
-          "type": "luminosidade",
-          "metrics": [
-            {
-              "field": "luminosidade",
-              "label": "Luminosidade",
-              "unit": "lux",
-              "alerts": {
-                "min": 100.0,
-                "max": 800.0
-              }
-            }
-          ]
-        },
-        {
-          "id": "sensor_006",
-          "name": "Sensor Consumo Energético",
-          "type": "personalizado",
-          "metrics": [
-            {
-              "field": "consumo_energetico",
-              "label": "Consumo Energético",
-              "unit": "kWh",
-              "data_type": "number",
-              "measurement_type": "acumulado",
-              "alerts": {
-                "min": 0.0,
-                "max": 500.0
-              },
-              "analysis": {
-                 "enabled": true,
-                 "window_size": 20,
-                 "trend": {
-                    "gradual_change": 0.05,
-                    "rapid_change": 0.15
+    "scenario":  {
+                     "id":  "industrial",
+                     "name":  "Ambiente Industrial",
+                     "description":  "Monitorização inteligente de um ambiente industrial"
+                 },
+    "dashboard":  {
+                      "charts":  {
+                                     "temperatura":  true,
+                                     "humidade":  true,
+                                     "luminosidade":  true,
+                                     "movimento":  false,
+                                     "consumo_energetico":  true
+                                 }
                   },
-                  "anomaly": {
-                    "method": "zscore",
-                      "threshold": 2.0,
-                      "tolerance": 0.01
-                      }
+    "zones":  [
+                  {
+                      "id":  "zona_producao",
+                      "name":  "Zona de Produção",
+                      "sensors":  [
+                                      {
+                                          "id":  "ind_sensor_001",
+                                          "name":  "Sensor Ambiental",
+                                          "type":  "ambiental",
+                                          "metrics":  [
+                                                          {
+                                                              "field":  "temperatura",
+                                                              "label":  "Temperatura",
+                                                              "unit":  "°C",
+                                                              "alerts":  {
+                                                                             "min":  10.0,
+                                                                             "max":  30.0
+                                                                         }
+                                                          },
+                                                          {
+                                                              "field":  "humidade",
+                                                              "label":  "Humidade",
+                                                              "unit":  "%",
+                                                              "alerts":  {
+                                                                             "min":  35.0,
+                                                                             "max":  75.0
+                                                                         }
+                                                          }
+                                                      ]
+                                      },
+                                      {
+                                          "id":  "ind_sensor_002",
+                                          "name":  "Sensor de Luminosidade",
+                                          "type":  "luminosidade",
+                                          "metrics":  [
+                                                          {
+                                                              "field":  "luminosidade",
+                                                              "label":  "Luminosidade",
+                                                              "unit":  "lux",
+                                                              "alerts":  {
+                                                                             "min":  100.0,
+                                                                             "max":  800.0
+                                                                         }
+                                                          }
+                                                      ]
+                                      },
+                                      {
+                                          "id":  "sensor_006",
+                                          "name":  "Sensor Consumo Energético",
+                                          "type":  "personalizado",
+                                          "metrics":  [
+                                                          {
+                                                              "field":  "consumo_energetico",
+                                                              "label":  "Consumo Energético",
+                                                              "unit":  "kWh",
+                                                              "data_type":  "number",
+                                                              "measurement_type":  "acumulado",
+                                                              "alerts":  {
+                                                                             "min":  0.0,
+                                                                             "max":  500.0
+                                                                         },
+                                                              "analysis":  {
+                                                                               "enabled":  true,
+                                                                               "window_size":  20,
+                                                                               "trend":  {
+                                                                                             "gradual_change":  0.05,
+                                                                                             "rapid_change":  0.15
+                                                                                         },
+                                                                               "anomaly":  {
+                                                                                               "method":  "zscore",
+                                                                                               "threshold":  2.0,
+                                                                                               "tolerance":  0.01
+                                                                                           }
+                                                                           },
+                                                              "chart_type":  "linha"
+                                                          }
+                                                      ]
+                                      }
+                                  ]
                   },
-              "chart_type": "linha"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "zona_acesso",
-      "name": "Zona de Acesso",
-      "sensors": [
-        {
-          "id": "sensor_003",
-          "name": "Sensor de Movimento",
-          "type": "movimento",
-          "metrics": [
-            {
-              "field": "movimento",
-              "label": "Movimento",
-              "unit": "",
-              "data_type": "boolean",
-              "alerts": {
-                "high_activity": 7,
-                "persistent_activity": 9,
-                "min": 0,
-                "max": 1
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
+                  {
+                      "id":  "zona_acesso",
+                      "name":  "Zona de Acesso",
+                      "sensors":  [
+                                      {
+                                          "id":  "sensor_003",
+                                          "name":  "Sensor de Movimento",
+                                          "type":  "movimento",
+                                          "metrics":  [
+                                                          {
+                                                              "field":  "movimento",
+                                                              "label":  "Movimento",
+                                                              "unit":  "",
+                                                              "data_type":  "boolean",
+                                                              "alerts":  {
+                                                                             "high_activity":  7,
+                                                                             "persistent_activity":  9,
+                                                                             "min":  0,
+                                                                             "max":  1
+                                                                         }
+                                                          }
+                                                      ]
+                                      }
+                                  ]
+                  }
+              ]
 }

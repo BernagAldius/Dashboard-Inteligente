@@ -17,9 +17,48 @@ function buildAttributes(data) {
         }
     };
 
+    if (typeof data.scenario === 'string' && data.scenario.trim()) {
+        attributes.scenario = {
+            type: 'Text',
+            value: data.scenario
+        };
+    }
+
+    const restMetadata = data.rest_metadata;
+
+    if (
+        restMetadata &&
+        typeof restMetadata.metric === 'string' &&
+        Object.prototype.hasOwnProperty.call(data, restMetadata.metric)
+    ) {
+        const metric = restMetadata.metric;
+
+        attributes[metric] = {
+            type: 'Number',
+            value: data[metric],
+            metadata: {
+                unit: {
+                    type: 'Text',
+                    value: restMetadata.unit
+                },
+                min: {
+                    type: 'Number',
+                    value: restMetadata.min
+                },
+                max: {
+                    type: 'Number',
+                    value: restMetadata.max
+                }
+            }
+        };
+    }
+
     for (const [key, value] of Object.entries(data)) {
+        if (restMetadata && key === restMetadata.metric) {
+            continue;
+        }
         if (
-            ['sensor_id', 'tipo', 'timestamp', 'analytics'].includes(key)
+            ['sensor_id', 'tipo', 'timestamp', 'analytics', 'scenario', 'rest_metadata'].includes(key)
         ) {
             continue;
         }
@@ -46,7 +85,7 @@ async function syncSensorToFiware(data) {
     const response = await fetch(
         `${ORION_URL}/v2/entities/${encodeURIComponent(entityId)}/attrs`,
         {
-            method: 'PATCH',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(attributes),
             signal: AbortSignal.timeout(5000)
@@ -58,7 +97,8 @@ async function syncSensorToFiware(data) {
     }
 
     if (response.status !== 404) {
-        throw new Error(`FIWARE HTTP ${response.status}`);
+        const errorBody = await response.text();
+        throw new Error(`FIWARE HTTP ${response.status}: ${errorBody}`);
     }
 
     const createResponse = await fetch(`${ORION_URL}/v2/entities`, {
@@ -80,7 +120,7 @@ async function syncSensorToFiware(data) {
         const retryResponse = await fetch(
             `${ORION_URL}/v2/entities/${encodeURIComponent(entityId)}/attrs`,
             {
-                method: 'PATCH',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attributes),
                 signal: AbortSignal.timeout(5000)

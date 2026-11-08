@@ -26,8 +26,11 @@ function loadRestSources() {
     );
 
     return (scenarioConfig.data_sources || []).filter(
-        source => source.enabled === true && source.type === 'rest'
-    );
+        source => source.enabled === true && source.type === 'rest')
+        .map(source => ({
+            ...source,
+            scenario
+        }));
 }
 
 // Extrair um valor de um JSON através de um caminho como:
@@ -73,8 +76,15 @@ async function fetchRestSource(source) {
     return {
         sensor_id: source.sensor_id,
         tipo: 'rest',
+        scenario: source.scenario,
         [source.metric]: value,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        rest_metadata: {
+            metric: source.metric,
+            unit: source.unit,
+            min: source.min,
+            max: source.max
+        }
     };
 }
 

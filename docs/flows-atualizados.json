@@ -868,5 +868,273 @@
     "x": 720,
     "y": 790,
     "wires": []
+  },
+  {
+    "id": "inject_dom_sensor_001",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Timer Domotica Ambiental",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 160,
+    "y": 1100,
+    "wires": [
+      [
+        "sim_dom_sensor_001"
+      ]
+    ]
+  },
+  {
+    "id": "sim_dom_sensor_001",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Domotica Ambiental",
+    "func": "msg.payload = { sensor_id: 'dom_sensor_001', tipo: 'domotica', scenario: 'domotica', temperatura: Math.floor(Math.random() * 15) + 18, humidade: Math.floor(Math.random() * 35) + 40, timestamp: new Date().toISOString() }; return msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 1100,
+    "wires": [
+      [
+        "mqtt_dom_sensor_001"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_dom_sensor_001",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Domotica Ambiental",
+    "topic": "sensors/domotica/ambiental",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 770,
+    "y": 1100,
+    "wires": []
+  },
+  {
+    "id": "inject_dom_sensor_002",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Timer Domotica Luminosidade",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 160,
+    "y": 1190,
+    "wires": [
+      [
+        "sim_dom_sensor_002"
+      ]
+    ]
+  },
+  {
+    "id": "sim_dom_sensor_002",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Domotica Luminosidade",
+    "func": "msg.payload = { sensor_id: 'dom_sensor_002', tipo: 'domotica', scenario: 'domotica', luminosidade: Math.floor(Math.random() * 900) + 50, timestamp: new Date().toISOString() }; return msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 1190,
+    "wires": [
+      [
+        "mqtt_dom_sensor_002"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_dom_sensor_002",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Domotica Luminosidade",
+    "topic": "sensors/domotica/luminosidade",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 770,
+    "y": 1190,
+    "wires": []
+  },
+  {
+    "id": "inject_ind_sensor_001",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Timer Industrial Ambiental",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 160,
+    "y": 1280,
+    "wires": [
+      [
+        "sim_ind_sensor_001"
+      ]
+    ]
+  },
+  {
+    "id": "sim_ind_sensor_001",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Industrial Ambiental",
+    "func": "msg.payload = { sensor_id: 'ind_sensor_001', tipo: 'industrial', scenario: 'industrial', temperatura: Math.floor(Math.random() * 15) + 18, humidade: Math.floor(Math.random() * 35) + 40, timestamp: new Date().toISOString() }; return msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 1280,
+    "wires": [
+      [
+        "mqtt_ind_sensor_001"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_ind_sensor_001",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Industrial Ambiental",
+    "topic": "sensors/industrial/ambiental",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 770,
+    "y": 1280,
+    "wires": []
+  },
+  {
+    "id": "inject_ind_sensor_002",
+    "type": "inject",
+    "z": "f84a663b31f096d7",
+    "name": "Timer Industrial Luminosidade",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 160,
+    "y": 1370,
+    "wires": [
+      [
+        "sim_ind_sensor_002"
+      ]
+    ]
+  },
+  {
+    "id": "sim_ind_sensor_002",
+    "type": "function",
+    "z": "f84a663b31f096d7",
+    "name": "Industrial Luminosidade",
+    "func": "msg.payload = { sensor_id: 'ind_sensor_002', tipo: 'industrial', scenario: 'industrial', luminosidade: Math.floor(Math.random() * 900) + 50, timestamp: new Date().toISOString() }; return msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 1370,
+    "wires": [
+      [
+        "mqtt_ind_sensor_002"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_ind_sensor_002",
+    "type": "mqtt out",
+    "z": "f84a663b31f096d7",
+    "name": "MQTT Industrial Luminosidade",
+    "topic": "sensors/industrial/luminosidade",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "3f93e0e0fa0e28c2",
+    "x": 770,
+    "y": 1370,
+    "wires": []
   }
 ]

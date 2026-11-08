@@ -113,6 +113,10 @@ async function saveSensorData(data) {
         .tag('tipo', data.tipo)
         .timestamp(validDate);
 
+    if (typeof data.scenario === 'string' && data.scenario.trim()) {
+        point.tag('scenario', data.scenario);
+    }
+
     let fieldCount = 0;
 
     Object.keys(data).forEach((key) => {
