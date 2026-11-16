@@ -8,6 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { Server } = require('socket.io');
 const { startRestSources } = require('./rest-sources');
+const { startConfigWatcher } = require('./config-watcher');
 const { syncSensorToFiware } = require('./fiware');
 
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
@@ -199,6 +200,7 @@ async function saveSensorData(data) {
 // ======================================================
 
 startRestSources(saveSensorData);
+startConfigWatcher(() => startRestSources(saveSensorData));
 
 // ======================================================
 // MQTT
@@ -282,9 +284,19 @@ app.get('/dashboard-config', (req, res) => {
 });
 
 app.get('/sensor-data', async (req, res) => {
+    const allowedRanges = ['1h', '5d'];
+    const requestedRange = req.query.range || '1h';
+
+    if (typeof requestedRange !== 'string' ||
+        !allowedRanges.includes(requestedRange)) {
+        return res.status(400).json({
+            error: 'Intervalo inválido'
+        });
+    }
+
     const fluxQuery = `
         from(bucket: "${influxBucket}")
-        |> range(start: -1h)
+        |> range(start: -${requestedRange})
         |> filter(fn: (r) => r._measurement == "sensor_readings")
         |> pivot(rowKey:["_time", "sensor_id", "tipo"], columnKey: ["_field"], valueColumn: "_value")
     `;

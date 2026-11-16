@@ -1,0 +1,10 @@
+.git
+.gitignore
+**/node_modules
+**/.env
+**/.env.*
+**/__pycache__
+**/*.pyc
+**/*.bak
+**/*.log
+grafana/backups

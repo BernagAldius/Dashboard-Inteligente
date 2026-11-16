@@ -2462,7 +2462,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "A",
@@ -2480,7 +2480,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")\r\n  |\u003e sort(columns: [\"_time\"])\r\n  |\u003e movingAverage(n: 5)\r\n  |\u003e set(key: \"_field\", value: \"temperatura_media_movel\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperatura\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")\r\n  |\u003e sort(columns: [\"_time\"])\r\n  |\u003e movingAverage(n: 5)\r\n  |\u003e set(key: \"_field\", value: \"temperatura_media_movel\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "B",
@@ -2556,7 +2556,7 @@
                                                                                                                                                                    "tooltip":  false,
                                                                                                                                                                    "viz":  false
                                                                                                                                                                },
-                                                                                                                                                  "insertNulls":  false,
+                                                                                                                                                  "insertNulls":  600000,
                                                                                                                                                   "lineInterpolation":  "smooth",
                                                                                                                                                   "lineWidth":  1,
                                                                                                                                                   "pointSize":  5,
@@ -2638,7 +2638,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "A",
@@ -2656,7 +2656,7 @@
                                                                                                                                                            "name":  "afra0bj7axla8d"
                                                                                                                                                        },
                                                                                                                                         "spec":  {
-                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: -15m)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")\r\n  |\u003e sort(columns: [\"_time\"])\r\n  |\u003e movingAverage(n: 5)\r\n  |\u003e set(key: \"_field\", value: \"humidade_media_movel\")"
+                                                                                                                                                     "query":  "from(bucket: \"iot_data\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"sensor_readings\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"humidade\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"sensor_id\"] == \"${sensor}\")\r\n  |\u003e sort(columns: [\"_time\"])\r\n  |\u003e movingAverage(n: 5)\r\n  |\u003e set(key: \"_field\", value: \"humidade_media_movel\")"
                                                                                                                                                  }
                                                                                                                                     },
                                                                                                                           "refId":  "B",
@@ -2732,7 +2732,7 @@
                                                                                                                                                                    "tooltip":  false,
                                                                                                                                                                    "viz":  false
                                                                                                                                                                },
-                                                                                                                                                  "insertNulls":  false,
+                                                                                                                                                  "insertNulls":  600000,
                                                                                                                                                   "lineInterpolation":  "linear",
                                                                                                                                                   "lineWidth":  1,
                                                                                                                                                   "pointSize":  5,
@@ -4036,8 +4036,8 @@
                           ],
                  "timeSettings":  {
                                       "timezone":  "browser",
-                                      "from":  "now-30m",
-                                      "to":  "now+1m",
+                                      "from":  "now-5d",
+                                      "to":  "now",
                                       "autoRefresh":  "10s",
                                       "autoRefreshIntervals":  [
                                                                    "5s",

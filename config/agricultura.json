@@ -96,6 +96,25 @@
               }
             }
           ]
+        },
+        {
+          "id": "sensor_rest_002",
+          "name": "Humidade Exterior Open-Meteo",
+          "type": "rest",
+          "metrics": [
+            {
+              "field": "humidade_externa",
+              "label": "Humidade Externa",
+              "unit": "%",
+              "data_type": "number",
+              "measurement_type": "instantaneo",
+              "chart_type": "linha",
+              "alerts": {
+                "min": 0.0,
+                "max": 100.0
+              }
+            }
+          ]
         }
       ]
     },
@@ -140,6 +159,21 @@
       "unit": "°C",
       "min": 0.0,
       "max": 40.0
+    },
+    {
+      "id": "rest_humidade",
+      "enabled": true,
+      "name": "Humidade Exterior Open-Meteo",
+      "type": "rest",
+      "method": "GET",
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=38.57&longitude=-7.91&current=relative_humidity_2m",
+      "interval_seconds": 360,
+      "sensor_id": "sensor_rest_002",
+      "metric": "humidade_externa",
+      "json_path": "current.relative_humidity_2m",
+      "unit": "%",
+      "min": 0.0,
+      "max": 100.0
     }
   ]
 }

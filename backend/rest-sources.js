@@ -92,6 +92,8 @@ async function fetchRestSource(source) {
 // EXECUCAO PERIODICA DAS FONTES REST
 // ======================================================
 
+let restTimers = [];
+
 function startRestSources(saveSensorData) {
     let sources;
 
@@ -99,11 +101,10 @@ function startRestSources(saveSensorData) {
         sources = loadRestSources();
     } catch (error) {
         console.error('[REST] Erro na configuração:', error.message);
-        return;
+        return false;
     }
 
-    console.log(`[REST] ${sources.length} fonte(s) ativa(s)`);
-
+    // Validar todas as fontes antes de alterar os temporizadores.
     for (const source of sources) {
         const interval = Number(source.interval_seconds);
 
@@ -111,9 +112,20 @@ function startRestSources(saveSensorData) {
             console.error(
                 `[REST] Intervalo inválido na fonte ${source.id}`
             );
-            continue;
+            return false;
         }
+    }
 
+    // Parar as aquisições periódicas anteriores.
+    for (const timer of restTimers) {
+        clearInterval(timer);
+    }
+    restTimers = [];
+
+    console.log(`[REST] ${sources.length} fonte(s) ativa(s)`);
+
+    for (const source of sources) {
+        const interval = Number(source.interval_seconds);
         let running = false;
 
         async function collect() {
@@ -122,7 +134,6 @@ function startRestSources(saveSensorData) {
 
             try {
                 const data = await fetchRestSource(source);
-
                 await saveSensorData(data);
 
                 console.log(
@@ -137,12 +148,15 @@ function startRestSources(saveSensorData) {
             }
         }
 
-        // Primeira aquisição imediata
+        // Primeira aquisição imediata.
         collect();
 
-        // Aquisições seguintes no intervalo configurado
-        setInterval(collect, interval * 1000);
+        // Guardar o temporizador para permitir futuras atualizações.
+        const timer = setInterval(collect, interval * 1000);
+        restTimers.push(timer);
     }
+
+    return true;
 }
 
 module.exports = {

@@ -43,3 +43,15 @@ fonte_rest_exemplo_campo_json=current.temperature_2m
 fonte_rest_exemplo_unidade=°C
 fonte_rest_exemplo_min=0
 fonte_rest_exemplo_max=40
+
+# SEGUNDA FONTE REST - HUMIDADE EXTERIOR
+fonte_rest_humidade=true
+fonte_rest_humidade_nome=Humidade Exterior Open-Meteo
+fonte_rest_humidade_url=https://api.open-meteo.com/v1/forecast?latitude=38.57&longitude=-7.91&current=relative_humidity_2m
+fonte_rest_humidade_intervalo=360
+fonte_rest_humidade_sensor=sensor_rest_002
+fonte_rest_humidade_metrica=humidade_externa
+fonte_rest_humidade_campo_json=current.relative_humidity_2m
+fonte_rest_humidade_unidade=%
+fonte_rest_humidade_min=0
+fonte_rest_humidade_max=100

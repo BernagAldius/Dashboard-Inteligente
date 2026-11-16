@@ -1,12 +1,40 @@
+import os
 import json
 import shutil
 import sys
 from pathlib import Path
 
-CONFIG_DIR = Path(__file__).parent
+CONFIG_DIR = Path(os.environ.get("DASHBOARD_CONFIG_DIR", Path(__file__).resolve().parent))
 TXT_FILE = CONFIG_DIR / "configuracao_utilizador.txt"
 
 CENARIOS_VALIDOS = {"domotica", "industrial", "agricultura"}
+
+import tempfile
+
+
+def guardar_json_seguro(destino, dados):
+    temporario = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=destino.parent,
+            prefix=f".{destino.name}.",
+            suffix=".tmp",
+            delete=False
+        ) as ficheiro:
+            temporario = Path(ficheiro.name)
+            json.dump(dados, ficheiro, indent=2, ensure_ascii=False)
+            ficheiro.write("\n")
+            ficheiro.flush()
+            os.fsync(ficheiro.fileno())
+
+        os.replace(temporario, destino)
+
+    finally:
+        if temporario is not None and temporario.exists():
+            temporario.unlink()
 
 # Campos que podem ser definidos para cada nova métrica
 CAMPOS_METRICA = {
@@ -561,9 +589,7 @@ def atualizar_json(configuracao):
     else:
         print(f"Backup original já existente: '{backup_file.name}'.")
 
-    with json_file.open("w", encoding="utf-8") as ficheiro:
-        json.dump(dados, ficheiro, indent=2, ensure_ascii=False)
-        ficheiro.write("\n")
+    guardar_json_seguro(json_file, dados)
 
     print(f"Ficheiro '{json_file.name}' atualizado com sucesso.")
 
@@ -582,9 +608,7 @@ def atualizar_cenario_ativo(configuracao):
 
     dados["activeScenario"] = configuracao["cenario"]
 
-    with active_file.open("w", encoding="utf-8") as ficheiro:
-        json.dump(dados, ficheiro, indent=2, ensure_ascii=False)
-        ficheiro.write("\n")
+    guardar_json_seguro(active_file, dados)
 
     print(
         f"Cenário ativo atualizado para '{configuracao['cenario']}'."
